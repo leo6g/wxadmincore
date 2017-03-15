@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AccessTokenMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="ADD_TIME" property="addTime" jdbcType="DATE"/>
+	<result column="ACCESS_TOKEN" property="accessToken" jdbcType="VARCHAR"/>
+	<result column="EXPIRES_IB" property="expiresIb" jdbcType="INTEGER"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="addTime != null and addTime !=''" >
+		 AND ADD_TIME = to_date('${addTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="accessToken != null" >
+		 AND ACCESS_TOKEN = #{accessToken,jdbcType=VARCHAR}
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="expiresIb != null" >
+		 AND EXPIRES_IB = #{expiresIb,jdbcType=INTEGER}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	ADD_TIME,ACCESS_TOKEN,ID,EXPIRES_IB
+  </sql>
+  
+  <!-- 分页查询微信获取token -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_ACCESS_TOKEN
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信获取token -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_ACCESS_TOKEN
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信获取token总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_ACCESS_TOKEN
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信获取token -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_ACCESS_TOKEN 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信获取token编码,查询微信获取token信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_ACCESS_TOKEN
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信获取token -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_ACCESS_TOKEN
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="addTime != null"> ADD_TIME, </if>
+	<if test="accessToken != null"> ACCESS_TOKEN, </if>
+	<if test="expiresIb != null"> EXPIRES_IB, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="addTime != null"> to_date('${addTime}','yyyy-mm-dd hh24:mi:ss'), </if>
+	<if test="accessToken != null"> #{accessToken,jdbcType=VARCHAR}, </if>
+	<if test="expiresIb != null"> #{expiresIb,jdbcType=INTEGER}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信获取token -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_ACCESS_TOKEN
+     <set >
+    <if test="addTime != null">ADD_TIME = sysdate, </if>
+	<if test="accessToken != null">ACCESS_TOKEN = #{accessToken,jdbcType=VARCHAR}, </if>
+	<if test="expiresIb != null">EXPIRES_IB = #{expiresIb,jdbcType=INTEGER}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_ACCESS_TOKEN
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信获取token -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_ACCESS_TOKEN
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

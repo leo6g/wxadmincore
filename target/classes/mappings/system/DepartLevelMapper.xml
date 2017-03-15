@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DepartLevelMapper" >
+
+
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="LEV_NAME" property="levName" jdbcType="VARCHAR" />
+    <result column="LEV_CODE" property="levCode" jdbcType="VARCHAR" />
+    <result column="DESCN" property="descn" jdbcType="VARCHAR" />
+    <result column="LEV_ORDER" property="levOrder" jdbcType="DECIMAL" />
+    <result column="DELETE_FLAG" property="deleteFlag" jdbcType="DECIMAL" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+  </resultMap>
+  
+  
+  <sql id="Base_Column_List" >
+    ID, LEV_NAME, LEV_CODE, DESCN, LEV_ORDER, DELETE_FLAG, CREATE_TIME, UPDATE_TIME
+  </sql>
+  
+  
+  <!-- 分业查询机构级别信息 -->
+  <select id="getDepLevelListByPage" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_S_DEPART_LEVEL
+	    where DELETE_FLAG = 0
+	    order by LEV_ORDER asc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  
+  <!-- 查询机构级别信息总数量 -->
+  <select id="countAllDepLevel" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_S_DEPART_LEVEL
+	    where DELETE_FLAG = 0
+  </select>
+  
+  <!-- 查询所有机构级别信息 -->
+  <select id="getAllDepLevel" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_S_DEPART_LEVEL
+    where DELETE_FLAG = 0
+    order by LEV_ORDER asc
+  </select>
+  
+  <!-- 根据ID,查询机构级别信息 -->
+  <select id="getDepLevelById" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_S_DEPART_LEVEL
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据机构级别编码,查询机构级别信息 -->
+  <select id="getDepLevelByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_S_DEPART_LEVEL
+    where LEV_CODE = #{levCode,jdbcType=VARCHAR}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select>
+  
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from WEIXIN.T_S_DEPART_LEVEL
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 新增机构级别信息 -->
+  <insert id="insertDepLevel" parameterType="java.util.Map" >
+    insert into T_S_DEPART_LEVEL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="levName != null" >
+        LEV_NAME,
+      </if>
+      <if test="levCode != null" >
+        LEV_CODE,
+      </if>
+      <if test="descn != null" >
+        DESCN,
+      </if>
+      <if test="levOrder != null" >
+        LEV_ORDER,
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG,
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="levName != null" >
+        #{levName,jdbcType=VARCHAR},
+      </if>
+      <if test="levCode != null" >
+        #{levCode,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null" >
+        #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="levOrder != null" >
+        #{levOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  
+  
+  <!-- 更新机构级别信息 -->
+  <update id="updateDepLevel" parameterType="java.util.Map" >
+    update T_S_DEPART_LEVEL
+    <set >
+      <if test="levName != null" >
+        LEV_NAME = #{levName,jdbcType=VARCHAR},
+      </if>
+      <if test="levCode != null" >
+        LEV_CODE = #{levCode,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null" >
+        DESCN = #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="levOrder != null" >
+        LEV_ORDER = #{levOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG = #{deleteFlag,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  <!-- 逻辑删除机构级别信息 -->
+  <update id="logicDelDepLevel" parameterType="java.util.Map" >
+    update T_S_DEPART_LEVEL
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

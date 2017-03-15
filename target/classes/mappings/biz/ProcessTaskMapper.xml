@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ProcessTaskMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="TASK_ID" property="taskId" jdbcType="VARCHAR"/>
+  	<result column="ARTICLE_IDS" property="articleIds" jdbcType="VARCHAR"/>
+	<result column="PROCESS_ID" property="processId" jdbcType="VARCHAR"/>
+	<result column="TYPE" property="type" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="EXECUTE_TIME" property="executeTime" jdbcType="DATE"/>
+	<result column="TASKER_ID" property="taskerId" jdbcType="VARCHAR"/>
+	<result column="STATE" property="state" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="articleIds != null" >
+		 AND ARTICLE_IDS = #{articleIds,jdbcType=VARCHAR}
+	 </if>
+	<if test="processId != null" >
+		 AND PROCESS_ID = #{processId,jdbcType=VARCHAR}
+	 </if>
+	<if test="taskId != null" >
+		 AND TASK_ID = #{taskId,jdbcType=VARCHAR}
+	 </if>
+	<if test="type != null" >
+		 AND TYPE = #{type,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="executeTime != null and executeTime !=''" >
+		 AND EXECUTE_TIME = to_date('${executeTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="taskerId != null" >
+		 AND TASKER_ID = #{taskerId,jdbcType=VARCHAR}
+	 </if>
+	<if test="state != null" >
+		 AND STATE = #{state,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	ARTICLE_IDS,PROCESS_ID,TASK_ID,TYPE,CREATE_TIME,EXECUTE_TIME,TASKER_ID,STATE
+  </sql>
+  
+  <!-- 分页查询图文审批流程任务 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_PROC_TASK
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询图文审批流程任务 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_TASK
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询图文审批流程任务总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_PROC_TASK
+	   <if test="_parameter != null" >
+	     <include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有图文审批流程任务 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_TASK 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据图文审批流程任务编码,查询图文审批流程任务信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_TASK
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="taskId != null" >
+    	and TASK_ID != #{taskId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加图文审批流程任务 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_PROC_TASK
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       TASK_ID,
+      <if test="articleIds != null"> ARTICLE_IDS, </if>
+	<if test="processId != null"> PROCESS_ID, </if>
+	<if test="type != null"> TYPE, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="executeTime != null"> EXECUTE_TIME, </if>
+	<if test="taskerId != null"> TASKER_ID, </if>
+	<if test="state != null"> STATE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{taskId},
+     <if test="articleIds != null"> #{articleIds,jdbcType=VARCHAR}, </if>
+	<if test="processId != null"> #{processId,jdbcType=VARCHAR}, </if>
+	<if test="type != null"> #{type,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="executeTime != null">#{executeTime,jdbcType=DATE}, </if>
+	<if test="taskerId != null"> #{taskerId,jdbcType=VARCHAR}, </if>
+	<if test="state != null"> #{state,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新图文审批流程任务 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_PROC_TASK
+     <set >
+      <if test="articleIds != null">ARTICLE_IDS = #{articleIds,jdbcType=VARCHAR}, </if>
+	<if test="processId != null">PROCESS_ID = #{processId,jdbcType=VARCHAR}, </if>
+	<if test="type != null">TYPE = #{type,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="executeTime != null">EXECUTE_TIME = #{executeTime,jdbcType=DATE}, </if>
+	<if test="taskerId != null">TASKER_ID = #{taskerId,jdbcType=VARCHAR}, </if>
+	<if test="state != null">STATE = #{state,jdbcType=VARCHAR}, </if>
+    </set>
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_PROC_TASK
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除图文审批流程任务 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_PROC_TASK
+    set DELETE_FLAG = -1
+    where TASK_ID = #{taskId,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CardApplierMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="APPLIER_ID" property="applierId" jdbcType="VARCHAR"/>
+  	<result column="ID_NUMBER" property="idNumber" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="DELETE_FLAG" property="deleteFlag" jdbcType="INTEGER"/>
+	<result column="APPLY_TIME" property="applyTime" jdbcType="DATE"/>
+	<result column="NET_POINT_ID" property="netPointId" jdbcType="VARCHAR"/>
+	<result column="CELL_NUMBER" property="cellNumber" jdbcType="VARCHAR"/>
+	<result column="CARD_ID" property="cardId" jdbcType="VARCHAR"/>
+	<result column="CARD_NAME" property="cardName" jdbcType="VARCHAR"/>
+	<result column="CARD_TYPE" property="cardType" jdbcType="VARCHAR"/>
+	
+	<result column="OPEN_ID" property="openId" jdbcType="VARCHAR"/>
+	<result column="APPLY_TYPE" property="applyType" jdbcType="VARCHAR"/>
+	<result column="FINC_ID" property="fincId" jdbcType="VARCHAR"/>
+	<result column="USEAGE" property="useage" jdbcType="VARCHAR"/>
+	<result column="LOAN_AMOUNT" property="loanAmount" jdbcType="VARCHAR"/>
+	<result column="PROCESS_STATE" property="processState" jdbcType="VARCHAR"/>
+	<result column="PROCESS_RESULT" property="processResult" jdbcType="VARCHAR"/>
+	<result column="TASKER_ID" property="taskerId" jdbcType="VARCHAR"/>
+	<result column="PROCESS_REMARK" property="processRemark" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+      <if test="idNumber != null and idNumber !=''" >
+		 AND r.ID_NUMBER like '%'||#{idNumber}||'%' 
+	 </if>
+	<if test="name != null and name !=''" >
+		 AND r.NAME like '%'||#{name}||'%' 
+	 </if>
+	<if test="applierId != null" >
+		 AND r.APPLIER_ID = #{applierId}
+	 </if>
+	 <if test="beginTime != null and  beginTime != ''">
+         <![CDATA[ AND r.APPLY_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+      <if test="endTime != null and  endTime != ''">
+         <![CDATA[ AND r.APPLY_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+	<if test="netPointId != null" >
+		 AND r.NET_POINT_ID = #{netPointId}
+	 </if>
+	<if test="cellNumber != null and cellNumber !=''" >
+		 AND r.CELL_NUMBER like '%'||#{cellNumber}||'%'
+	 </if>
+	 
+	<if test="cardId != null and cardId !=''" >
+		 AND r.CARD_ID = #{cardId}
+	 </if>
+	 <if test="openId != null and openId !=''" >
+		 AND r.OPEN_ID = #{openId}
+	 </if>
+	 <if test="applyType != null and applyType !=''" >
+		 AND r.APPLY_TYPE = #{applyType}
+	 </if>
+	 <if test="fincId != null and fincId !=''" >
+		 AND r.FINC_ID = #{fincId}
+	 </if>
+	 <if test="useage != null and useage !=''" >
+		 AND r.USEAGE = #{useage}
+	 </if>
+	 <if test="loanAmount != null and loanAmount !=''" >
+		 AND r.LOAN_AMOUNT = #{loanAmount}
+	 </if>
+	 <if test="processState != null and processState !=''" >
+		 AND r.PROCESS_STATE = #{processState}
+	 </if>
+	 <if test="processResult != null and processResult !=''" >
+		 AND r.PROCESS_RESULT = #{processResult}
+	 </if>
+	<if test="processRemark != null and processRemark != ''" >
+		 AND r.PROCESS_REMARK = #{processRemark,jdbcType=VARCHAR}
+	 </if>
+	 <if test="taskerId != null and taskerId !=''" >
+	 	 AND r.TASKER_ID = #{taskerId}
+	 </if>
+	<if test="depart != null and depart != ''" >
+		 AND r.NET_POINT_ID in
+		 <foreach  item="item" collection="depart" index="index"  open="(" separator="," close=")">
+		 	#{item}
+		 </foreach>
+	</if>
+	<if test="handleId != null and handleId != ''" >
+		 and r.tasker_id = #{handleId}
+	</if>
+	 
+	 
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	r.ID_NUMBER,r.NAME,APPLIER_ID,r.DELETE_FLAG,r.APPLY_TIME,r.NET_POINT_ID,r.CELL_NUMBER,r.CARD_ID,card.NAME AS CARD_NAME,card.TYPE AS CARD_TYPE,
+  	r.OPEN_ID,r.APPLY_TYPE,r.FINC_ID,r.USEAGE,r.LOAN_AMOUNT,r.PROCESS_STATE,r.PROCESS_RESULT,r.TASKER_ID,r.PROCESS_REMARK
+  </sql>
+  
+  <!-- 分页查询信用卡申办信息表 -->
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    ,t.org_sht_name as "orgShtName"
+	    ,u.real_name as "realName"
+	    ,f.name as "loanName"
+	    from T_BIZ_CARD_APPLIER r 
+	    inner join
+		(
+		select cy.new_org_id, cy.org_sht_name, cy.org_lvl ,
+		town.town AS town, city.city AS city
+		from b_psbc_all_org_info cy,
+		b_psbc_all_org_info town ,
+		b_psbc_all_org_info city
+		where 1=1
+		and  cy.pagency_id = town.new_org_id
+		and town.pagency_id= city.new_org_id
+		and cy.org_lvl=5 
+		<if test="cityId != null and cityId !=''" >
+		 AND city.new_org_id = #{cityId}
+	    </if>
+	    <if test="townId != null and townId !=''" >
+		 and town.new_org_id = #{townId}
+	    </if>
+	    <if test="countryId != null and countryId !=''" >
+		 and cy.new_org_id = #{countryId}
+	    </if>
+		) T on r.NET_POINT_ID = T.new_org_id 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		left join T_S_USER_PROPERTY u on r.tasker_id = u.user_id
+		left join T_BIZ_FINANCE_PROD f on r.FINC_ID = f.FINC_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+     <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+   <!-- 分页查询信用卡申办信息表 -->
+  <select id="getListByRole" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    ,sd.depart_name as "departName"
+	    ,u.real_name as "realName"
+	    ,f.name as "loanName"
+	    from T_BIZ_CARD_APPLIER r 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		left join T_S_USER_PROPERTY u on r.tasker_id = u.user_id
+    	left join t_s_depart sd on sd.id = r.net_point_id
+    	left join T_BIZ_FINANCE_PROD f on r.FINC_ID = f.FINC_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 分页查询信用卡申办信息表 -->
+  <select id="getListByCardInfo" resultMap="BaseResultMap" >
+  	select 
+	    <include refid="Base_Column_List" />
+	    ,u.real_name as "realName"
+	    ,t.org_sht_name as "orgShtName"
+	    ,t.town as "town"
+	    ,t.city as "city"
+	    ,f.name as "loanName"
+	    from T_BIZ_CARD_APPLIER r 
+	    inner join
+		(
+		select cy.new_org_id, cy.org_sht_name, cy.org_lvl ,
+		town.town AS town, city.city AS city
+		from b_psbc_all_org_info cy,
+		b_psbc_all_org_info town ,
+		b_psbc_all_org_info city
+		where 1=1
+		and  cy.pagency_id = town.new_org_id
+		and town.pagency_id= city.new_org_id
+		and cy.org_lvl=5 
+		<if test="cityId != null and cityId !=''" >
+		 AND city.new_org_id = #{cityId}
+	    </if>
+	    <if test="townId != null and townId !=''" >
+		 and town.new_org_id = #{townId}
+	    </if>
+	    <if test="countryId != null and countryId !=''" >
+		 and cy.new_org_id = #{countryId}
+	    </if>
+		) T on r.NET_POINT_ID = T.new_org_id 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		left join T_S_USER_PROPERTY u on r.tasker_id = u.user_id
+		left join T_BIZ_FINANCE_PROD f on r.FINC_ID = f.FINC_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  
+     <!-- 根据条件查询信用卡申办信息表 ,导出excel用不带分页-->
+  <select id="getListByRoleAll" resultMap="BaseResultMap" >
+	    select 
+	    <include refid="Base_Column_List" />
+	    ,u.real_name as "realName"
+	    ,t.org_sht_name as "orgShtName"
+	    ,f.name as "loanName"
+	    from T_BIZ_CARD_APPLIER r 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		left join T_S_USER_PROPERTY u on r.tasker_id = u.user_id
+		left join b_psbc_all_org_info t on t.new_org_id = r.net_point_id
+		left join T_BIZ_FINANCE_PROD f on r.FINC_ID = f.FINC_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+     <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  
+  <!-- 根据Id查询信用卡申办信息表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_CARD_APPLIER r
+    left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+    where APPLIER_ID = #{applierId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询信用卡申办信息表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	   from T_BIZ_CARD_APPLIER r 
+	    inner join
+		(select cy.new_org_id, cy.org_sht_name, cy.org_lvl ,
+		town.town AS town, city.city AS city
+		from b_psbc_all_org_info cy,
+		b_psbc_all_org_info town ,
+		b_psbc_all_org_info city
+		where 1=1
+		and  cy.pagency_id = town.new_org_id
+		and town.pagency_id= city.new_org_id
+		and cy.org_lvl=5 
+		<if test="cityId != null and cityId !=''" >
+		 AND city.new_org_id = #{cityId}
+	    </if>
+	    <if test="townId != null and townId !=''" >
+		 and town.new_org_id = #{townId}
+	    </if>
+	    <if test="countryId != null and countryId !=''" >
+		 and cy.new_org_id = #{countryId}
+	    </if>
+		) T on r.NET_POINT_ID = T.new_org_id 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>  
+  </select>
+  
+  <!-- 查询信用卡申办信息表总数量 -->
+  
+  <select id="countAllByRole" resultType="java.lang.Integer" >
+	    select count(1)
+	   from T_BIZ_CARD_APPLIER r 
+		left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+		where r.DELETE_FLAG=0  
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>  
+  </select>
+  <!-- 查询所有信用卡申办信息表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_CARD_APPLIER r
+    left join t_wx_card_info card on card.CARD_ID = r.CARD_ID
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据信用卡申办信息表编码,查询信用卡申办信息表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_CARD_APPLIER
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="applierId != null" >
+    	and APPLIER_ID != #{applierId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加信用卡申办信息表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_CARD_APPLIER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       APPLIER_ID,
+      <if test="idNumber != null"> ID_NUMBER, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="deleteFlag != null"> DELETE_FLAG, </if>
+	<if test="applyTime != null and applyTime !=''"> APPLY_TIME, </if>
+	<if test="netPointId != null"> NET_POINT_ID, </if>
+	<if test="cellNumber != null"> CELL_NUMBER, </if>
+	<if test="cardId != null"> CARD_ID, </if>
+	<if test="openId != null"> OPEN_ID, </if>
+	<if test="applyType != null"> APPLY_TYPE, </if>
+	<if test="fincId != null"> FINC_ID, </if>
+	<if test="useage != null"> USEAGE, </if>
+	<if test="loanAmount != null"> LOAN_AMOUNT, </if>
+	<if test="processState != null"> PROCESS_STATE, </if>
+	<if test="processResult != null"> PROCESS_RESULT, </if>
+	<if test="taskerId != null"> TASKER_ID, </if>
+	<if test="processRemark != null"> PROCESS_REMARK, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{applierId},
+     <if test="idNumber != null"> #{idNumber}, </if>
+	<if test="name != null"> #{name}, </if>
+	<if test="deleteFlag != null"> #{deleteFlag}, </if>
+	<if test="applyTime != null and applyTime !=''"> to_date('${applyTime}','yyyy-mm-dd hh24:mi:ss'), </if>
+	<if test="netPointId != null"> #{netPointId}, </if>
+	<if test="cellNumber != null"> #{cellNumber}, </if>
+	<if test="cardId != null"> #{cardId}, </if>
+	<if test="openId != null"> #{openId}, </if>
+	<if test="applyType != null"> #{applyType}, </if>
+	<if test="fincId != null"> #{fincId}, </if>
+	<if test="useage != null"> #{useage}, </if>
+	<if test="loanAmount != null"> #{loanAmount}, </if>
+	<if test="processState != null"> #{processState}, </if>
+	<if test="processResult != null"> #{processResult}, </if>
+	<if test="taskerId != null"> #{taskerId}, </if>
+	<if test="processRemark != null"> #{processRemark,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新信用卡申办信息表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_CARD_APPLIER
+     <set >
+      <if test="idNumber != null">ID_NUMBER = #{idNumber}, </if>
+	<if test="name != null">NAME = #{name}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag}, </if>
+	<if test="applyTime != null and applyTime !=''">APPLY_TIME = #{applyTime}, </if>
+	<if test="netPointId != null">NET_POINT_ID = #{netPointId}, </if>
+	<if test="cellNumber != null">CELL_NUMBER = #{cellNumber}, </if>
+	<if test="cardId != null">CARD_ID = #{cardId}, </if>
+	<if test="openId != null"> OPEN_ID = #{openId}, </if>
+	<if test="applyType != null"> APPLY_TYPE = #{applyType}, </if>
+	<if test="fincId != null"> FINC_ID = #{fincId}, </if>
+	<if test="useage != null"> USEAGE = #{useage}, </if>
+	<if test="loanAmount != null"> LOAN_AMOUNT = #{loanAmount}, </if>
+	<if test="processState != null"> PROCESS_STATE = #{processState}, </if>
+	<if test="processResult != null"> PROCESS_RESULT = #{processResult}, </if>
+	<if test="taskerId != null"> TASKER_ID = #{taskerId}, </if>
+	<if test="processRemark != null">PROCESS_REMARK = #{processRemark,jdbcType=VARCHAR}, </if>
+    </set>
+    where APPLIER_ID = #{applierId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_CARD_APPLIER
+    where APPLIER_ID = #{applierId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除信用卡申办信息表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_CARD_APPLIER
+    set DELETE_FLAG = -1
+    where APPLIER_ID = #{applierId,jdbcType=VARCHAR}
+  </update>
+</mapper>

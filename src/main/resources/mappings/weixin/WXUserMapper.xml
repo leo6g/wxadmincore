@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXUserMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="WX_USER_ID" property="wxUserId" jdbcType="VARCHAR"/>
+  	<result column="NICK_NAME" property="nickName" jdbcType="VARCHAR"/>
+	<result column="OPEN_ID" property="openId" jdbcType="VARCHAR"/>
+	<result column="DELETE_FLAG" property="deleteFlag" jdbcType="INTEGER"/>
+	<result column="HEADER_IMAGE" property="headerImage" jdbcType="VARCHAR"/>
+	<result column="GROUP_ID" property="groupId" jdbcType="VARCHAR"/>
+	<result column="UNSUBSCRIBE_TIME" property="unsubscribeTime" jdbcType="DATE"/>
+	<result column="SUBSCRIBE_TIME" property="subscribeTime" jdbcType="DATE"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="GENDER" property="gender" jdbcType="VARCHAR"/>
+	<result column="GNAME" property="groupName" jdbcType="VARCHAR"/>
+	
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="ID_NUMBER" property="idNumber" jdbcType="VARCHAR"/>
+	<result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR"/>
+	<result column="ADDRESS" property="address" jdbcType="VARCHAR"/>
+	<result column="DEAL_PWD" property="dealPwd" jdbcType="VARCHAR"/>
+	<result column="SELF_IMG" property="selfImg" jdbcType="VARCHAR"/>
+	<result column="SUBSCRIBE" property="subscribe" jdbcType="INTEGER"/>
+	<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+	<result column="USER_LEVEL" property="userLevel" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="nickName != null and nickName !=''" >
+		 AND T.NICK_NAME LIKE '%'||#{nickName}||'%' 
+	 </if>
+	<if test="openId != null" >
+		 AND T.OPEN_ID = #{openId}
+	 </if>
+	<if test="deleteFlag != null" >
+		 AND T.DELETE_FLAG = #{deleteFlag}
+	 </if>
+	<if test="wxUserId != null" >
+		 AND T.WX_USER_ID = #{wxUserId}
+	 </if>
+	<if test="headerImage != null" >
+		 AND T.HEADER_IMAGE = #{headerImage}
+	 </if>
+	<if test="groupId != null" >
+		 AND T.GROUP_ID = #{groupId}
+	 </if>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''" >
+		 AND T.UNSUBSCRIBE_TIME = to_date('${unsubscribeTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="subscribeTime != null and subscribeTime !=''" >
+		 AND T.SUBSCRIBE_TIME = to_date('${subscribeTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND T.CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND T.CREATE_USER = #{createUser}
+	 </if>
+	 <if test="name != null and name !=''" >
+		 AND T.NAME like '%'||#{name}||'%'
+	 </if>
+	 <if test="idNumber != null and idNumber !=''" >
+		 AND T.ID_NUMBER like '%'||#{idNumber,jdbcType=VARCHAR}||'%'
+	 </if>
+	 <if test="phoneNumber != null and phoneNumber !=''" >
+		 AND T.PHONE_NUMBER like '%'||#{phoneNumber,jdbcType=VARCHAR}||'%'
+	 </if>
+	 <if test="subscribe != null" >
+		 AND T.SUBSCRIBE = #{subscribe}
+	 </if>    
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	T.NICK_NAME,T.OPEN_ID,T.DELETE_FLAG,T.WX_USER_ID,T.HEADER_IMAGE,T.GROUP_ID,T.UNSUBSCRIBE_TIME,T.SUBSCRIBE_TIME,
+  	T.CREATE_TIME,T.CREATE_USER,T.NAME,T.GENDER,T.ID_NUMBER,T.PHONE_NUMBER,T.ADDRESS,T.DEAL_PWD,
+  	T.SELF_IMG,T.SUBSCRIBE,T.REMARK,P.COUNTRY,P.PROVINCE,P.CITY,P.LANGUAGE,USER_LEVEL
+  </sql>
+  
+  <!-- 分页查询微信关注用户表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_USER T,T_WX_USER_PROPERTY P
+	    WHERE P.WX_USER_ID(+) = T.WX_USER_ID
+	<if test="nickName != null and nickName !=''" >
+		AND T.NICK_NAME LIKE '%'||#{nickName}||'%' 
+	</if>
+	<if test="openIds != null and openIds !='' and openIds.size()!=0" >
+		AND   OPEN_ID IN 
+		<foreach collection="openIds" index="index" item="tag" open="("
+    	separator="," close=")">
+   		#{tag}
+  		</foreach>
+	</if>
+	AND SUBSCRIBE = 1
+    ORDER BY SUBSCRIBE_TIME DESC
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信关注用户表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_USER T,T_WX_USER_PROPERTY P
+	WHERE P.WX_USER_ID = T.WX_USER_ID
+    AND T.WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="getByOpenId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" /> 
+    from T_WX_USER T,T_WX_USER_PROPERTY P
+	WHERE P.WX_USER_ID = T.WX_USER_ID
+    AND OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信关注用户表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_USER T WHERE 1=1 
+	    <if test="nickName != null and nickName !=''" >
+		AND T.NICK_NAME LIKE '%'||#{nickName}||'%' 
+		</if>
+     	<if test="openIds != null and openIds.size()!=0" >
+     	AND T.OPEN_ID IN 
+     	<foreach collection="openIds" index="index" item="tag" open="("
+    	separator="," close=")">
+   		#{tag}
+  		</foreach>
+     	</if>
+     	AND SUBSCRIBE = 1
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+    
+  <!-- 查询微信关注用户表总数量 -->
+  
+  <select id="countAllUser" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_USER 
+	    WHERE SUBSCRIBE = 1
+  </select>
+  <!-- 查询所有微信关注用户表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_USER T,T_WX_USER_PROPERTY P
+	WHERE P.WX_USER_ID(+) = T.WX_USER_ID
+	<if test="userLevel != null and userLevel !=''" >
+		 AND USER_LEVEL like '%'||#{userLevel,jdbcType=VARCHAR}||'%'
+	</if>
+   	<if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    AND SUBSCRIBE = 1
+  </select>
+  <!-- 根据微信关注用户表编码,查询微信关注用户表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_USER
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="wxUserId != null" >
+    	and WX_USER_ID != #{wxUserId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  
+  <!-- 增加微信关注用户表（同步时使用） -->
+  <insert id="insertSync" parameterType="java.util.Map" >
+    insert into T_WX_USER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       WX_USER_ID,
+      <if test="nickname != null"> NICK_NAME, </if>
+	<if test="openid != null"> OPEN_ID, </if>
+	<if test="deleteFlag != null"> DELETE_FLAG, </if>
+	<if test="headimgurl != null"> HEADER_IMAGE, </if>
+	<if test="groupId != null"> GROUP_ID, </if>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''"> UNSUBSCRIBE_TIME, </if>
+	<if test="subscribeTime != null and subscribeTime !=''"> SUBSCRIBE_TIME, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="idNumber != null"> ID_NUMBER, </if>
+	<if test="phoneNumber != null"> PHONE_NUMBER, </if>
+	<if test="subscribe != null"> SUBSCRIBE, </if>
+	<if test="gender != null"> GENDER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{wxUserId},
+     <if test="nickname != null"> #{nickname}, </if>
+	<if test="openid != null"> #{openid}, </if>
+	<if test="deleteFlag != null"> #{deleteFlag}, </if>
+	<if test="headimgurl != null"> #{headimgurl}, </if>
+	<if test="groupId != null"> #{groupId}, </if>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''"> #{unsubscribeTime}, </if>
+	<if test="subscribeTime != null and subscribeTime !=''"> #{subscribeTime}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="name != null"> #{name}, </if>
+	<if test="idNumber != null"> #{idNumber,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null"> #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="subscribe != null"> #{subscribe}, </if>
+	<if test="gender != null"> #{gender}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 增加微信关注用户属性表 -->
+  <insert id="insertProperty" parameterType="java.util.Map" >
+    insert into T_WX_USER_PROPERTY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+	    ID,
+	    <if test="wxUserId != null"> WX_USER_ID, </if>
+	    <if test="country != null"> COUNTRY, </if>
+		<if test="province != null"> PROVINCE, </if>
+		<if test="city != null"> CITY, </if>
+		<if test="language != null"> LANGUAGE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	    <if test="wxPropertyId != null"> #{wxPropertyId}, </if>
+	    <if test="wxUserId != null"> #{wxUserId}, </if>
+		<if test="country != null"> #{country}, </if>
+		<if test="province != null"> #{province}, </if>
+		<if test="city != null"> #{city}, </if>
+		<if test="language != null"> #{language}, </if>
+    </trim>
+  </insert>
+  
+    <!--取消时修改关注状态 -->
+  <update id="updateByOpenId" parameterType="java.util.Map" >
+    update T_WX_USER
+     <set>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''">UNSUBSCRIBE_TIME = #{unsubscribeTime},  </if>
+	<if test="subscribeTime != null and subscribeTime !=''">SUBSCRIBE_TIME =  #{subscribeTime}, </if>
+	 SUBSCRIBE = 0
+    </set>
+    where OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </update> 
+  <!-- 更新微信关注用户表 -->
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_USER
+     <set>
+    <if test="nickName != null">NICK_NAME = #{nickName}, </if>
+	<if test="openId != null">OPEN_ID = #{openId}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag}, </if>
+	<if test="headImage != null">HEADER_IMAGE = #{headImage,jdbcType=VARCHAR}, </if>
+	<if test="groupId != null">GROUP_ID = #{groupId,jdbcType=VARCHAR}, </if>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''">UNSUBSCRIBE_TIME = #{unsubscribeTime}, </if>
+	<if test="subscribeTime != null and subscribeTime !=''">SUBSCRIBE_TIME =  #{subscribeTime}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="dealPwd != null">DEAL_PWD = #{dealPwd,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="address != null">ADDRESS = #{address,jdbcType=VARCHAR}, </if>
+	<if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="idNumber != null">ID_NUMBER = #{idNumber,jdbcType=VARCHAR}, </if>
+	<if test="gender != null">GENDER = #{gender}, </if>
+	<if test="selfImg != null">SELF_IMG = #{selfImg,jdbcType=VARCHAR}, </if>
+	<if test="subscribe != null"> SUBSCRIBE = #{subscribe}, </if>
+	<if test="remark != null"> REMARK = #{remark}, </if>
+    </set>
+    where WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+    OR OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 更新微信关注用户表(同步时使用) -->
+  <update id="updateSync" parameterType="java.util.Map" >
+    update T_WX_USER
+     <set>
+    <if test="nickname != null">NICK_NAME = #{nickname}, </if>
+	<if test="openid != null">OPEN_ID = #{openid}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag}, </if>
+	<if test="headimgurl != null">HEADER_IMAGE = #{headimgurl,jdbcType=VARCHAR}, </if>
+	<if test="groupId != null">GROUP_ID = #{groupId,jdbcType=VARCHAR}, </if>
+	<if test="unsubscribeTime != null and unsubscribeTime !=''">UNSUBSCRIBE_TIME = #{unsubscribeTime}, </if>
+	<if test="subscribeTime != null and subscribeTime !=''">SUBSCRIBE_TIME =  #{subscribeTime}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="dealPwd != null">DEAL_PWD = #{dealPwd,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="address != null">ADDRESS = #{address,jdbcType=VARCHAR}, </if>
+	<if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="idNumber != null">ID_NUMBER = #{idNumber,jdbcType=VARCHAR}, </if>
+	<if test="gender != null">GENDER = #{gender}, </if>
+	<if test="selfImg != null">SELF_IMG = #{selfImg,jdbcType=VARCHAR}, </if>
+	<if test="subscribe != null"> SUBSCRIBE = #{subscribe}, </if>
+	<if test="remark != null"> REMARK = #{remark}, </if>
+    </set>
+    where WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 更新微信关注用户属性表 -->
+  <update id="updateProperty" parameterType="java.util.Map" >
+    update T_WX_USER_PROPERTY
+    <set>
+	    <if test="country != null">COUNTRY = #{country,jdbcType=VARCHAR}, </if>
+		<if test="province != null">PROVINCE = #{province,jdbcType=VARCHAR}, </if>
+		<if test="city != null">CITY = #{city,jdbcType=VARCHAR}, </if>
+		<if test="language != null">LANGUAGE = #{language,jdbcType=VARCHAR}, </if>
+    </set>
+    where WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+  </update>
+  
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_USER
+    where OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deletes" parameterType="java.lang.String" >
+    delete from T_WX_USER
+  </delete>
+  <!-- 逻辑删除微信关注用户表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_USER
+    set DELETE_FLAG = -1
+    where WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+  </update>
+  
+  <update id="updateUserGroup" parameterType="java.util.Map" >
+    update T_WX_USER
+    set GROUP_ID = #{groupId,jdbcType=VARCHAR}
+    where OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 获取昨日指标 -->
+  <select id="getKeyIndicatorsOfYesterday" resultType="java.util.Map">
+  	SELECT t.subscribecount,t.unsubscribecount, (t.subscribecount-t.unsubscribecount) as increasecount,t.subcount  
+  	from 
+		(
+		SELECT count(distinct(case when trunc(SUBSCRIBE_TIME) = trunc(sysdate-1) and SUBSCRIBE=1  then OPEN_ID end)) as subscribecount, 
+ 		count(distinct(case when trunc(UNSUBSCRIBE_TIME) = trunc(sysdate-1) and SUBSCRIBE=0  then OPEN_ID end)) as unsubscribecount,
+		count(distinct(case when 
+		<![CDATA[ trunc(SUBSCRIBE_TIME) <> trunc(sysdate) ]]>
+		and SUBSCRIBE=1  then OPEN_ID end)) as subcount
+		FROM T_WX_USER 
+		) t
+  </select>
+  
+  <sql id="subscribe_Where_Clause" >
+  	<trim prefix="where" prefixOverrides="and|or" >
+  		<if test="searchType == day"> 
+  			<if test="startTime != null and  startTime != ''">
+        		<![CDATA[ AND SUBSCRIBE_TIME >= to_date(#{startTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+    		</if>
+    		<if test="endTime != null and  endTime != ''">
+        		<![CDATA[ AND SUBSCRIBE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+    		</if>
+  			</if>
+  		<if test="searchType == week"> 
+        	<![CDATA[ AND SUBSCRIBE_TIME >= trunc(sysdate-7)]]>
+        	<![CDATA[ AND SUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+  		</if>
+  		<if test="searchType == half"> 
+			<![CDATA[ AND SUBSCRIBE_TIME >= trunc(sysdate-15)]]>
+        	<![CDATA[ AND SUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+  		</if>
+  		<if test="searchType == month"> 
+        	<![CDATA[ AND SUBSCRIBE_TIME >= trunc(sysdate-30)]]>
+        	<![CDATA[ AND SUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+  		</if>
+  	</trim>
+  </sql>
+  
+  <!-- 用户分析列表  sumnum累计关注总数  sm新增关注数  um取消关注数 jzm净增数 time时间-->
+  <select id="getSubscriberInfosOfYesterday" resultType="java.util.Map" parameterType="java.util.Map">
+  	SELECT  sum(m.sumnum) as "sumnum" ,sum(m.sm) as "sm", sum(m.um) as "um",sum(m.sm)-sum(m.um) as "jzm" ,m.time as "time"
+	from 
+		(
+			SELECT count (distinct(OPEN_ID)) sumnum ,0 as sm, 0 as um,to_char(SUBSCRIBE_TIME,'yyyy-mm-dd') as time
+				from T_WX_USER
+				<trim prefix="where" prefixOverrides="and|or" >
+	  				<if test="searchType == day"> 
+	  					<if test="startTime != null and  startTime != ''">
+	        				<![CDATA[ AND SUBSCRIBE_TIME < to_date(#{startTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+	    				</if>
+	  				</if>
+			  		<if test="searchType == week"> 
+			        	<![CDATA[ AND SUBSCRIBE_TIME < trunc(sysdate-7)]]>
+			    			
+			  		</if>
+			  		<if test="searchType == half"> 
+			        	<![CDATA[ AND SUBSCRIBE_TIME < trunc(sysdate-15)]]>
+			    			
+			  		</if>
+			  		<if test="searchType == month"> 
+			        	<![CDATA[ AND SUBSCRIBE_TIME < trunc(sysdate-30)]]>
+			    			
+			  		</if>
+	  			</trim>
+				and
+		 		SUBSCRIBE= 1 GROUP BY to_char(SUBSCRIBE_TIME,'yyyy-mm-dd')
+
+		UNION 
+
+				select 0 as sumnum, count(t.openId) as sm, 0 as um, to_char(t.subscribeTime,'yyyy-mm-dd') as time
+			  	from 
+					(
+						SELECT distinct(OPEN_ID) as openId,SUBSCRIBE_TIME as subscribeTime,
+						UNSUBSCRIBE_TIME as unsubscribeTime,SUBSCRIBE as subscribe 
+						from T_WX_USER 
+						<include refid="subscribe_Where_Clause" />
+			  		) t 
+			  	where 
+			  		t.subscribe =1 GROUP BY to_char(t.subscribeTime,'yyyy-mm-dd')
+
+		UNION
+
+				select 0 as sumnum, 0 as sm, count(t.openId)  as um, to_char(t.unsubscribeTime,'yyyy-mm-dd') as time
+			  	from 
+				(
+					SELECT distinct(OPEN_ID) as openId,SUBSCRIBE_TIME as subscribeTime,
+					UNSUBSCRIBE_TIME as unsubscribeTime,SUBSCRIBE as subscribe 
+					from T_WX_USER 
+						<trim prefix="where" prefixOverrides="and|or" >
+					  		<if test="searchType == day"> 
+					  			<if test="startTime != null and  startTime != ''">
+					        		<![CDATA[ AND UNSUBSCRIBE_TIME >= to_date(#{startTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+					    		</if>
+					    		<if test="endTime != null and  endTime != ''">
+					        		<![CDATA[ AND UNSUBSCRIBE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+					    		</if>
+					  			</if>
+					  		<if test="searchType == week"> 
+					        	<![CDATA[ AND UNSUBSCRIBE_TIME >= trunc(sysdate-7)]]>
+					        	<![CDATA[ AND UNSUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+					  		</if>
+					  		<if test="searchType == half"> 
+								<![CDATA[ AND UNSUBSCRIBE_TIME >= trunc(sysdate-15)]]>
+					        	<![CDATA[ AND UNSUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+					  		</if>
+					  		<if test="searchType == month"> 
+					        	<![CDATA[ AND UNSUBSCRIBE_TIME >= trunc(sysdate-30)]]>
+					        	<![CDATA[ AND UNSUBSCRIBE_TIME <= trunc(sysdate-1)]]>
+					  		</if>
+			  			</trim>
+			  	 
+			  	) t 
+			  	where 
+			  		t.subscribe =0 GROUP BY to_char(t.unsubscribeTime,'yyyy-mm-dd')
+		) m group by m.time
+  	
+  </select>
+
+  <!-- 批量给用户添加标签 -->
+  <update id="tagToUser" parameterType="java.util.Map" >
+    UPDATE T_WX_USER SET GROUP_ID = #{tagId} WHERE OPEN_ID IN
+    <foreach collection="openidList" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+  </update>
+  
+  <!-- 批量给用户删除标签 -->
+  <update id="deleteTagToUser" parameterType="java.util.Map" >
+    UPDATE T_WX_USER SET GROUP_ID = #{tagId} WHERE OPEN_ID IN
+    <foreach collection="openidList" index="index" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+  </update>
+  
+  
+  <select id="getUserInfoByOpenId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+	       T.NICK_NAME,
+	       T.OPEN_ID,
+	       T.DELETE_FLAG,
+	       T.WX_USER_ID,
+	       T.HEADER_IMAGE,
+	       T.GROUP_ID,
+	       T.UNSUBSCRIBE_TIME,
+	       T.SUBSCRIBE_TIME,
+	       T.CREATE_TIME,
+	       T.CREATE_USER,
+	       T.NAME,
+	       T.GENDER,
+	       T.ID_NUMBER,
+	       T.PHONE_NUMBER,
+	       T.ADDRESS,
+	       T.DEAL_PWD,
+	       T.SELF_IMG,
+	       T.SUBSCRIBE,
+	       T.REMARK
+    from T_WX_USER T
+	WHERE  OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="getAllOpenid" resultMap="BaseResultMap">
+	SELECT OPEN_ID
+	FROM T_WX_USER
+	WHERE SUBSCRIBE = 1
+  </select>
+</mapper>

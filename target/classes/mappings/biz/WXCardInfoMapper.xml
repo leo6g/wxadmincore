@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXCardInfoMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="CARD_ID" property="cardId" jdbcType="VARCHAR"/>
+  	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="TYPE" property="type" jdbcType="VARCHAR"/>
+	<result column="DELETE_FLAG" property="deleteFlag" jdbcType="INTEGER"/>
+	<result column="COMMENTS" property="comments" jdbcType="VARCHAR"/>
+	<result column="STATE" property="state" jdbcType="VARCHAR"/>
+	<result column="AUTH_STATE" property="authState" jdbcType="VARCHAR"/>
+	<result column="IMAGE_PATH" property="imagePath" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="HOT_FLAG" property="hotFlag" jdbcType="VARCHAR"/>
+	<result column="RIGHTS" property="rights" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="name != null and name != ''" >
+		  AND NAME like '%'||#{name}||'%' 
+	 </if>
+	<if test="type != null and type != ''" >
+		 AND TYPE = #{type}
+	 </if>
+	<if test="deleteFlag != null and deleteFlag != ''" >
+		 AND DELETE_FLAG = #{deleteFlag}
+	 </if>
+	<if test="cardId != null and cardId != ''" >
+		 AND CARD_ID = #{cardId}
+	 </if>
+	<if test="comments != null and comments != ''" >
+		 AND COMMENTS = #{comments}
+	 </if>
+	<if test="state != null and state != ''" >
+		 AND STATE = #{state}
+	 </if>
+	<if test="authState != null and authState != ''" >
+		 AND AUTH_STATE = #{authState}
+	 </if>
+	<if test="imagePath != null and imagePath != ''" >
+		 AND IMAGE_PATH = #{imagePath}
+	 </if>
+	 <if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	<if test="hotFlag != null" >
+		 AND HOT_FLAG = #{hotFlag}
+	 </if>
+	  <if test="beginTime != null and  beginTime != ''">
+           <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+     </if>
+     <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+     </if>
+     <if test="role == 'business'" >
+		 AND AUTH_STATE in('DRAFT','1-WAITING','2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+	 <if test="role == 'infor'" >
+		 AND AUTH_STATE in('1-WAITING','2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+	 <if test="role == 'cardcheck'" >
+		 AND AUTH_STATE in('2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	NAME,TYPE,DELETE_FLAG,CARD_ID,COMMENTS,STATE,AUTH_STATE,IMAGE_PATH,CREATE_TIME,CREATE_USER,HOT_FLAG,RIGHTS
+  </sql>
+  
+  <!-- 分页查询信用卡信息发布表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_CARD_INFO
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+   	order by CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询信用卡信息发布表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_CARD_INFO
+    where CARD_ID = #{cardId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询信用卡信息发布表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_CARD_INFO
+     <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有信用卡信息发布表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_CARD_INFO 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据信用卡信息发布表编码,查询信用卡信息发布表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_CARD_INFO
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="cardId != null" >
+    	and CARD_ID != #{cardId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加信用卡信息发布表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_CARD_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       CARD_ID,
+      <if test="name != null"> NAME, </if>
+	<if test="type != null"> TYPE, </if>
+	<if test="deleteFlag != null"> DELETE_FLAG, </if>
+	<if test="comments != null"> COMMENTS, </if>
+	<if test="state != null"> STATE, </if>
+	<if test="authState != null"> AUTH_STATE, </if>
+	<if test="imagePath != null"> IMAGE_PATH, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="hotFlag != null"> HOT_FLAG, </if>
+	<if test="rights != null"> RIGHTS, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{cardId},
+     <if test="name != null"> #{name}, </if>
+	<if test="type != null"> #{type}, </if>
+	<if test="deleteFlag != null"> #{deleteFlag}, </if>
+	<if test="comments != null"> #{comments}, </if>
+	<if test="state != null"> #{state}, </if>
+	<if test="authState != null"> #{authState}, </if>
+	<if test="imagePath != null"> #{imagePath}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="hotFlag != null"> #{hotFlag}, </if>
+	<if test="rights != null"> #{rights}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新信用卡信息发布表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_CARD_INFO
+     <set >
+      <if test="name != null">NAME = #{name}, </if>
+	<if test="type != null">TYPE = #{type}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag}, </if>
+	<if test="comments != null">COMMENTS = #{comments}, </if>
+	<if test="state != null">STATE = #{state}, </if>
+	<if test="authState != null">AUTH_STATE = #{authState}, </if>
+	<if test="imagePath != null">IMAGE_PATH = #{imagePath}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="hotFlag != null">HOT_FLAG = #{hotFlag}, </if>
+	<if test="rights != null">RIGHTS =  #{rights}, </if>
+    </set>
+    where CARD_ID = #{cardId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_CARD_INFO
+    where CARD_ID = #{cardId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除信用卡信息发布表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_CARD_INFO
+    set DELETE_FLAG = -1
+    where CARD_ID = #{cardId,jdbcType=VARCHAR}
+  </update>
+</mapper>

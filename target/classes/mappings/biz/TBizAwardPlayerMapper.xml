@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="TBizAwardPlayerMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR"/>
+	<result column="SERIES_NUM" property="seriesNum" jdbcType="VARCHAR"/>
+	<result column="PLAY_FLAG" property="playFlag" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+     <if test="name != null and name != ''" >
+			 AND NAME like '%'||#{name}||'%'
+	</if>
+	<if test="phoneNumber != null and phoneNumber != ''" >
+		 AND PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}
+	 </if>
+	<if test="id != null and id != ''" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="seriesNum != null and seriesNum != ''" >
+		 AND SERIES_NUM = #{seriesNum,jdbcType=VARCHAR}
+	 </if>
+	<if test="playFlag != null and playFlag != ''" >
+		 AND PLAY_FLAG = #{playFlag,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	NAME,PHONE_NUMBER,ID,SERIES_NUM,PLAY_FLAG
+  </sql>
+  
+  <!-- 分页查询抽奖人员资格信息表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_AWARD_PLAYER
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询抽奖人员资格信息表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_AWARD_PLAYER
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询抽奖人员资格信息表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_AWARD_PLAYER 
+	 <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+  </select>
+  
+  <!-- 查询所有抽奖人员资格信息表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_AWARD_PLAYER 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  
+  <!-- 增加抽奖人员资格信息表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_AWARD_PLAYER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="name != null and name != ''"> NAME, </if>
+	<if test="phoneNumber != null and phoneNumber != ''"> PHONE_NUMBER, </if>
+	<if test="seriesNum != null and seriesNum != ''"> SERIES_NUM, </if>
+	<if test="playFlag != null and playFlag != ''"> PLAY_FLAG, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="name != null and name != ''"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null and phoneNumber != ''"> #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="seriesNum != null and seriesNum != ''"> #{seriesNum,jdbcType=VARCHAR}, </if>
+	<if test="playFlag != null and playFlag != ''"> #{playFlag,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新抽奖人员资格信息表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_AWARD_PLAYER
+     <set >
+      <if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="seriesNum != null">SERIES_NUM = #{seriesNum,jdbcType=VARCHAR}, </if>
+	<if test="playFlag != null">PLAY_FLAG = #{playFlag,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_AWARD_PLAYER
+    where 1=1 
+    <if test="id != null and id != ''" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	</if>
+	<if test="seriesNum != null and seriesNum != ''" >
+		 AND SERIES_NUM = #{seriesNum,jdbcType=VARCHAR}
+	 </if>
+  </delete>
+
+  
+    <!-- 查询抽奖期次-->
+  
+  <select id="getSeriesNumList" resultMap="BaseResultMap" >
+  	select distinct SERIES_NUM as "seriesNum" 
+  	from T_BIZ_AWARD_PLAYER
+  </select>
+</mapper>

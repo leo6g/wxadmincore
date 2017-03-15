@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DictionaryMapper" >
+
+  
+  <sql id="Base_Column_List" >
+    	g.ID as "id",
+     	g.DIC_GROUP_CODE as "dicGroupCode",
+     	g.DIC_GROUP_NAME as "dicGroupName",
+     	g.DELETE_FLAG as "deleteFlag"
+  </sql>
+  
+
+  <!-- 分页查询数据字典组列表信息 -->
+  <select id="getList" resultType="java.util.Map" parameterType="java.util.Map">
+    <include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_S_DICTIONARY_GROUP g
+	    where g.DELETE_FLAG=0 
+	    <if test="dicGroupName != null and dicGroupName != ''" >
+        	and g.DIC_GROUP_NAME like CONCAT(CONCAT('%',#{dicGroupName}),'%')
+      	</if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+	  
+  
+  <!-- 根据ID,查询数据字典组信息 -->
+  <select id="getDicGroupById" resultType="java.util.Map" parameterType="java.util.Map">
+	    select 
+	    	g.ID as "id",
+	    	g.DIC_GROUP_CODE as "dicGroupCode",
+	    	g.DIC_GROUP_NAME as "dicGroupName",
+	    	g.DELETE_FLAG as "deleteFlag"
+	    from T_S_DICTIONARY_GROUP g
+	    where g.DELETE_FLAG=0 
+	    and g.ID = #{id,jdbcType=VARCHAR}
+  </select>	  
+  
+  <!-- 查询字典组总数量 -->
+  <select id="countTotalDictionary" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_S_DICTIONARY_GROUP g
+	    where g.DELETE_FLAG=0 
+	    <if test="dicGroupName != null and dicGroupName != ''" >
+        	and g.DIC_GROUP_NAME like CONCAT(CONCAT('%',#{dicGroupName}),'%')
+      	</if>
+  </select>
+  
+  
+  <!-- 根据编码,查询数据字典组数量 -->
+  <select id="countDicGroupByCode" resultType="java.lang.Integer" parameterType="java.util.Map" >
+	    select count(1) 
+	    from T_S_DICTIONARY_GROUP
+	    where DIC_GROUP_CODE = #{dicGroupCode,jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0 
+	    <if test="id != null" >
+	    	and ID != #{id,jdbcType=VARCHAR}
+	    </if>
+  </select>
+  
+  
+  <!-- 新增数据字典组信息 -->
+  <insert id="insertDicGroup" parameterType="java.util.Map" >
+    insert into T_S_DICTIONARY_GROUP
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="dicGroupCode != null" >
+        DIC_GROUP_CODE,
+      </if>
+      <if test="dicGroupName != null" >
+        DIC_GROUP_NAME,
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="dicGroupCode != null" >
+        #{dicGroupCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dicGroupName != null" >
+        #{dicGroupName,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag},
+      </if>
+    </trim>
+  </insert>
+  
+  
+  <!-- 修改数据字典组信息 -->
+  <update id="updateDicGroup" parameterType="java.util.Map" >
+    update T_S_DICTIONARY_GROUP
+    <set >
+      <if test="dicGroupCode != null" >
+        DIC_GROUP_CODE = #{dicGroupCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dicGroupName != null" >
+        DIC_GROUP_NAME = #{dicGroupName,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG = #{deleteFlag},
+      </if>	
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  <!-- 根据ID,查询数据字典信息 -->
+  <select id="getDicById" resultType="java.util.Map" parameterType="java.util.Map">
+	    select 
+	    	d.ID as "id",
+	    	d.DIC_CODE as "dicCode",
+	    	d.DIC_NAME as "dicName",
+	    	d.DIC_GROUP_ID as "dicGroupId",
+	    	d.PARENT_ID as "parentId",
+	    	d.DELETE_FLAG as "deleteFlag"
+	    from T_S_DICTIONARY d
+	    where d.DELETE_FLAG=0 
+	    and d.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  
+  <!-- 查询一级数据字典信息 -->
+  <select id="getDicsLevel_1" resultType="java.util.Map" parameterType="java.util.Map" >
+	    SELECT 
+	    	d.ID as "id",
+	    	d.DIC_CODE as "dicCode",
+	    	d.DIC_NAME as "dicName",
+	    	d.DIC_GROUP_ID as "dicGroupId",
+	    	d.PARENT_ID as "parentId",
+	    	d.DELETE_FLAG as "deleteFlag"
+	    FROM T_S_DICTIONARY d
+	    WHERE d.PARENT_ID = '0'
+	    AND d.DELETE_FLAG = 0
+	    AND d.DIC_GROUP_ID = #{dicGroupId}
+  </select>
+  
+  <!-- 根据数据字典父ID，查询数据字典数量 -->
+  <select id="getDicCountByParentId" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	    SELECT COUNT(1) FROM T_S_DICTIONARY
+	    WHERE PARENT_ID = #{parentId, jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0
+	    AND DIC_GROUP_ID = #{dicGroupId}
+  </select>
+  
+  
+  
+  <!-- 根据父ID,查询子集数据字典信息 -->
+  <select id="getDicListByParentId" resultType="java.util.Map" parameterType="java.util.Map" >
+	    SELECT 
+	    	d.ID as "id",
+	    	d.DIC_CODE as "dicCode",
+	    	d.DIC_NAME as "dicName",
+	    	d.DIC_GROUP_ID as "dicGroupId",
+	    	d.PARENT_ID as "parentId",
+	    	d.DELETE_FLAG as "deleteFlag"
+	    FROM T_S_DICTIONARY d
+	    WHERE d.PARENT_ID = #{parentId, jdbcType=VARCHAR}
+	    AND d.DELETE_FLAG = 0
+	    AND d.DIC_GROUP_ID = #{dicGroupId}
+  </select>
+  
+  
+  <!-- 根据编码,查询数据字典 -->
+  <select id="countDicByCode" resultType="java.lang.Integer" parameterType="java.util.Map" >
+	    select count(1) 
+	    from T_S_DICTIONARY
+	    where DIC_CODE = #{dicCode,jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0 
+	    <if test="id != null" >
+	    	and ID != #{id,jdbcType=VARCHAR}
+	    </if>
+  </select>
+  
+  
+  <!-- 新增数据字典信息 -->
+  <insert id="insertDic" parameterType="java.util.Map" >
+    insert into T_S_DICTIONARY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="dicCode != null" >
+        DIC_CODE,
+      </if>
+      <if test="dicName != null" >
+        DIC_NAME,
+      </if>
+      <if test="dicGroupId != null" >
+        DIC_GROUP_ID,
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID,
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="dicCode != null" >
+        #{dicCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dicName != null" >
+        #{dicName,jdbcType=VARCHAR},
+      </if>
+      <if test="dicGroupId != null" >
+        #{dicGroupId,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag},
+      </if>
+    </trim>
+  </insert>
+  
+  
+  <!-- 修改数据字典信息 -->
+  <update id="updateDic" parameterType="java.util.Map" >
+    update T_S_DICTIONARY
+    <set >
+      <if test="dicCode != null" >
+        DIC_CODE = #{dicCode,jdbcType=VARCHAR},
+      </if>
+      <if test="dicName != null" >
+        DIC_NAME = #{dicName,jdbcType=VARCHAR},
+      </if>
+      <if test="dicGroupId != null" >
+        DIC_GROUP_ID = #{dicGroupId},
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID = #{parentId},
+      </if>	
+      <if test="deleteFlag != null" >
+        DELETE_FLAG = #{deleteFlag},
+      </if>	
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  <!-- 根据数据字典组编码，查询子集数据字典信息(PS:目前只查询字典一级目录，如果要查询字典树数据，请自行扩展) -->
+  <select id="queryDicsByGCode" resultType="java.util.Map" parameterType="java.util.Map" >
+	    SELECT 
+	    	d.ID as "id",
+	    	d.DIC_CODE as "dicCode",
+	    	d.DIC_NAME as "dicName"
+	    FROM T_S_DICTIONARY_GROUP g
+	    inner join T_S_DICTIONARY d on g.ID=D.DIC_GROUP_ID
+	    WHERE d.PARENT_ID = '0'
+	    AND g.DELETE_FLAG = 0 and d.DELETE_FLAG = 0
+	    AND g.DIC_GROUP_CODE = #{dicGroupCode}
+  </select>
+  
+  
+  <select id="getDicDetailByDicCode" resultType="java.util.Map" parameterType="java.util.Map" >
+	  	select y.id,
+	       y.DIC_CODE     as "icCode",
+	       y.DIC_NAME     as "dicName",
+	       y.DIC_GROUP_ID as "dicGroupId",
+	       y.PARENT_ID    as "parentId"
+	  from T_S_DICTIONARY y
+	  where y.delete_flag=0 and y.DIC_CODE=#{dicCode}
+  </select>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- log4j2每隔60秒，自动监控该配置文件是否有变化，如果变化，则自动根据文件内容重新配置 -->
+<configuration status="debug" monitorInterval="60">
+
+	<appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %-5level [%t] %logger{36} - %m%n" />
+		</Console>
+		<!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch） -->
+		<RollingRandomAccessFile name="wxadmincore"
+			fileName="../logs/wxadmincore/wxadmincore.log" filePattern="../logs/wxadmincore/wxadmincore-%d{yyyy-MM-dd}.log">
+			<PatternLayout pattern="%d %-5level [%t] %logger{36} - %m%n" />
+			<TimeBasedTriggeringPolicy interval="1"
+				modulate="true" />
+		</RollingRandomAccessFile>
+	</appenders>
+	<loggers>
+		<logger name="com.lfc.wxadmincore.common.dao.*" additivity="true" level="debug">
+		</logger>
+		<Root level="debug">
+			<appender-ref ref="Console" />
+			<appender-ref ref="wxadmincore" />
+		</Root>
+	</loggers>
+</configuration>

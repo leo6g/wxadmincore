@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="TBStaffRecomendR1Mapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<result column="STAFF_CODE" property="staffCode" jdbcType="VARCHAR"/>
+	<result column="DEPART_NAME" property="departName" jdbcType="VARCHAR"/>
+	<result column="DEPART_CODE" property="departCode" jdbcType="VARCHAR"/>
+	<result column="OPEN_DAY_CNT" property="openDayCnt" jdbcType="INTEGER"/>
+	<result column="OPEN_CNT_RANK" property="openCntRank" jdbcType="INTEGER"/>
+	<result column="OPEN_CNT" property="openCnt" jdbcType="INTEGER"/>
+	<result column="REAL_NAME" property="realName" jdbcType="VARCHAR"/>
+	<result column="STATIS_DATE" property="statisDate" jdbcType="DATE"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	 </if>
+	<if test="departCode != null and departCode !=''" >
+		 AND DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+	 </if>
+	<if test="openDayCnt != null and openDayCnt!=''" >
+		 AND OPEN_DAY_CNT = #{openDayCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="openCntRank != null and openCntRank!=''" >
+		 AND OPEN_CNT_RANK = #{openCntRank,jdbcType=INTEGER}
+	 </if>
+	<if test="openCnt != null and openCnt !=''" >
+		 AND OPEN_CNT = #{openCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+	<if test="statisDate2 != null and  statisDate2 != ''">
+            <![CDATA[ AND STATIS_DATE = to_date(#{statisDate2,jdbcType=DATE},'yyyy-MM-dd')]]>
+      </if> 
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	STAFF_CODE,DEPART_NAME,DEPART_CODE,OPEN_DAY_CNT,OPEN_CNT_RANK,OPEN_CNT,REAL_NAME,STATIS_DATE
+  </sql>
+  
+  <!-- 分页查询劳动竞赛个人排名 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    (select c.depart_code, <!-- 机构编码  -->
+       c.depart_name, <!-- 机构名称  -->
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   and t.staff_code = #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id)
+union  all
+(select c.depart_code, <!-- 机构编码 --> 
+       c.depart_name, <!-- 机构名称 --> 
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   <![CDATA[and rownum <= 100]]>
+   and t.staff_code != #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id)
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+    
+  <!-- 查询劳动竞赛个人排名总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from ((select c.depart_code, <!-- 机构编码  -->
+       c.depart_name, <!-- 机构名称  -->
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   and t.staff_code = #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id)
+union  all
+(select c.depart_code, <!-- 机构编码 --> 
+       c.depart_name, <!-- 机构名称 --> 
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   <![CDATA[and rownum <= 100]]>
+   and t.staff_code != #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id))
+  </select>
+  
+    <!-- 查询劳动竞赛个人排名 导出数据使用--> 
+  <select id="getListAll" resultMap="BaseResultMap" >
+	    (select c.depart_code, <!-- 机构编码  -->
+       c.depart_name, <!-- 机构名称  -->
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   and t.staff_code = #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id)
+union  all
+(select c.depart_code, <!-- 机构编码 --> 
+       c.depart_name, <!-- 机构名称 --> 
+       t.staff_code, <!-- 员工柜员号码 -->
+       d.real_name, <!-- 真实姓名 -->  
+       count(distinct t.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       rank() over(order by count(distinct t.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       count(distinct(case
+                        when trunc(t.subscribe_time) = trunc(sysdate) then
+                         t.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 --> 
+       trunc(sysdate) statis_date,
+       d.open_id <!-- 柜员open_id -->   
+  from t_biz_staff_recomend t, <!-- 员工推荐吸粉信息表 -->
+       t_s_user             a,
+       T_S_DEPART_USER      b,
+       T_S_DEPART           c,
+       t_s_user_property    d
+ where t.staff_code = a.username
+   and a.id = b.user_id
+   and b.depart_id = c.id
+   and a.id = d.user_id
+   <![CDATA[and rownum <= 100]]>
+   and t.staff_code != #{loginUser}
+   <if test="staffCode != null and staffCode !=''" >
+		 AND STAFF_CODE like '%'||#{staffCode}||'%' 
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND DEPART_NAME like '%'||#{departName}||'%' 
+	</if>
+	<if test="realName != null and realName!=''" >
+		 AND REAL_NAME like '%'||#{realName}||'%' 
+	 </if>
+ group by t.staff_code,
+          c.depart_code,
+          c.depart_name,
+          d.real_name,
+          d.open_id)
+  </select>
+</mapper>

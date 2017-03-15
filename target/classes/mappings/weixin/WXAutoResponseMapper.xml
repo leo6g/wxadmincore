@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXAutoResponseMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="RESPONSE_ID" property="responseId" jdbcType="VARCHAR"/>
+  	<result column="MSG_TYPE" property="msgType" jdbcType="VARCHAR"/>
+	<result column="KEY_WORD" property="keyWord" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="TEXT_TEMP_ID" property="textTempId" jdbcType="VARCHAR"/>
+	<result column="TEXT_TEMP_NAME" property="textTempName" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="msgType != null and msgType != ''" >
+		 AND MSG_TYPE like '%'||#{msgType}||'%'
+	 </if>
+	<if test="keyWord != null" >
+		 AND KEY_WORD like '%'||#{keyWord}||'%'
+	 </if>
+	<if test="responseId != null" >
+		 AND RESPONSE_ID = #{responseId}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	<if test="textTempId != null" >
+		 AND TEXT_TEMP_ID = #{textTempId}
+	</if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	MSG_TYPE,KEY_WORD,RESPONSE_ID,CREATE_TIME,CREATE_USER,TEXT_TEMP_ID
+  </sql>
+  
+  <!-- 分页查询微信自动回复信息模版 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+  	select * from
+	    (select 
+       a.MSG_TYPE,a.KEY_WORD,a.RESPONSE_ID,a.CREATE_TIME,a.CREATE_USER,a.TEXT_TEMP_ID,b.content AS "textContent",b.NAME as TEXT_TEMP_NAME
+      from T_WX_AUTO_RESPONSE a join T_WX_TEXT_TEMPLATES b on a.TEXT_TEMP_ID = b.TEXT_TEMP_ID union select 
+       a.MSG_TYPE,a.KEY_WORD,a.RESPONSE_ID,a.CREATE_TIME,a.CREATE_USER,a.TEXT_TEMP_ID,null,c.NAME as TEXT_TEMP_NAME
+      from T_WX_AUTO_RESPONSE a join T_WX_NEWS_TEMPLATES c on a.TEXT_TEMP_ID = c.news_temp_id)
+     <if test="_parameter != null" >
+    	<include refid="Example_Where_Clause" />
+  		</if>
+      <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信自动回复信息模版 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_AUTO_RESPONSE
+    where RESPONSE_ID = #{responseId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信自动回复信息模版总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from (
+	    select 
+       a.MSG_TYPE,a.KEY_WORD,a.RESPONSE_ID,a.CREATE_TIME,a.CREATE_USER,a.TEXT_TEMP_ID,b.NAME as TEXT_TEMP_NAME
+      from T_WX_AUTO_RESPONSE a join T_WX_TEXT_TEMPLATES b on a.TEXT_TEMP_ID = b.TEXT_TEMP_ID union select 
+       a.MSG_TYPE,a.KEY_WORD,a.RESPONSE_ID,a.CREATE_TIME,a.CREATE_USER,a.TEXT_TEMP_ID,c.NAME as TEXT_TEMP_NAME
+      from T_WX_AUTO_RESPONSE a join T_WX_NEWS_TEMPLATES c on a.TEXT_TEMP_ID = c.news_temp_id
+	    )
+	    <if test="_parameter != null" >
+    	<include refid="Example_Where_Clause" />
+  		</if>
+       	<if test="orderByClause != null" >
+	     	order by ${orderByClause}
+	    </if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信自动回复信息模版 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_AUTO_RESPONSE 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信自动回复信息模版编码,查询微信自动回复信息模版信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_AUTO_RESPONSE
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="responseId != null" >
+    	and RESPONSE_ID != #{responseId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信自动回复信息模版 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_AUTO_RESPONSE
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       RESPONSE_ID,
+      <if test="msgType != null"> MSG_TYPE, </if>
+	<if test="keyWord != null"> KEY_WORD, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="textTempId != null"> TEXT_TEMP_ID, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{responseId},
+     <if test="msgType != null"> #{msgType}, </if>
+	<if test="keyWord != null"> #{keyWord}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="textTempId != null"> #{textTempId}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信自动回复信息模版 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_AUTO_RESPONSE
+     <set >
+      <if test="msgType != null">MSG_TYPE = #{msgType}, </if>
+	<if test="keyWord != null">KEY_WORD = #{keyWord}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="textTempId != null">TEXT_TEMP_ID = #{textTempId}, </if>
+    </set>
+    where RESPONSE_ID = #{responseId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_AUTO_RESPONSE
+    where RESPONSE_ID = #{responseId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信自动回复信息模版 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_AUTO_RESPONSE
+    set DELETE_FLAG = -1
+    where RESPONSE_ID = #{responseId,jdbcType=VARCHAR}
+  </update>
+</mapper>

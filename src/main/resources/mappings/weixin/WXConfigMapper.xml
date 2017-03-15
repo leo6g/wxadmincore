@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXConfigMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="CFG_ID" property="cfgId" jdbcType="VARCHAR"/>
+  	<result column="TOKEN" property="token" jdbcType="VARCHAR"/>
+	<result column="DESCRIPTION" property="description" jdbcType="VARCHAR"/>
+	<result column="TYPE" property="type" jdbcType="VARCHAR"/>
+	<result column="APP_ID" property="appId" jdbcType="VARCHAR"/>
+	<result column="ACCESS_TOKE" property="accessToke" jdbcType="VARCHAR"/>
+	<result column="ACCOUNT" property="account" jdbcType="VARCHAR"/>
+	<result column="ACCOUNT_ID" property="accountId" jdbcType="VARCHAR"/>
+	<result column="EMAIL" property="email" jdbcType="VARCHAR"/>
+	<result column="APP_SECRET" property="appSecret" jdbcType="VARCHAR"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="token != null" >
+		 AND TOKEN = #{token}
+	 </if>
+	<if test="description != null" >
+		 AND DESCRIPTION = #{description}
+	 </if>
+	<if test="type != null" >
+		 AND TYPE = #{type}
+	 </if>
+	<if test="cfgId != null" >
+		 AND CFG_ID = #{cfgId}
+	 </if>
+	<if test="appId != null" >
+		 AND APP_ID = #{appId}
+	 </if>
+	<if test="accessToke != null" >
+		 AND ACCESS_TOKE = #{accessToke}
+	 </if>
+	<if test="account != null" >
+		 AND ACCOUNT = #{account}
+	 </if>
+	<if test="accountId != null" >
+		 AND ACCOUNT_ID = #{accountId}
+	 </if>
+	<if test="email != null" >
+		 AND EMAIL = #{email}
+	 </if>
+	<if test="appSecret != null" >
+		 AND APP_SECRET = #{appSecret}
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	TOKEN,DESCRIPTION,TYPE,CFG_ID,APP_ID,ACCESS_TOKE,ACCOUNT,ACCOUNT_ID,EMAIL,APP_SECRET,CREATE_USER,CREATE_TIME
+  </sql>
+  
+  <!-- 分页查询微信账号配置信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_CONFIG
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信账号配置信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_CONFIG
+    where CFG_ID = #{cfgId,jdbcType=VARCHAR}
+  </select>
+  <!-- 根据Type查询微信账号配置信息 -->
+  
+  <select id="getByType" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_CONFIG
+    where TYPE = #{TYPE,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信账号配置信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_CONFIG
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信账号配置信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_CONFIG 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信账号配置信息编码,查询微信账号配置信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_CONFIG
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="cfgId != null" >
+    	and CFG_ID != #{cfgId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信账号配置信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_CONFIG
+   
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       CFG_ID,
+      <if test="token != null"> TOKEN, </if>
+	<if test="description != null"> DESCRIPTION, </if>
+	<if test="type != null"> TYPE, </if>
+	<if test="appId != null"> APP_ID, </if>
+	<if test="accessToke != null"> ACCESS_TOKE, </if>
+	<if test="account != null"> ACCOUNT, </if>
+	<if test="accountId != null"> ACCOUNT_ID, </if>
+	<if test="email != null"> EMAIL, </if>
+	<if test="appSecret != null"> APP_SECRET, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{cfgId},
+     <if test="token != null"> #{token}, </if>
+	<if test="description != null"> #{description}, </if>
+	<if test="type != null"> #{type}, </if>
+	<if test="appId != null"> #{appId}, </if>
+	<if test="accessToke != null"> #{accessToke}, </if>
+	<if test="account != null"> #{account}, </if>
+	<if test="accountId != null"> #{accountId}, </if>
+	<if test="email != null"> #{email}, </if>
+	<if test="appSecret != null"> #{appSecret}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信账号配置信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_CONFIG
+     <set >
+      <if test="token != null">TOKEN = #{token}, </if>
+	<if test="description != null">DESCRIPTION = #{description}, </if>
+	<if test="type != null">TYPE = #{type}, </if>
+	<if test="appId != null">APP_ID = #{appId}, </if>
+	<if test="accessToke != null">ACCESS_TOKE = #{accessToke}, </if>
+	<if test="account != null">ACCOUNT = #{account}, </if>
+	<if test="accountId != null">ACCOUNT_ID = #{accountId}, </if>
+	<if test="email != null">EMAIL = #{email}, </if>
+	<if test="appSecret != null">APP_SECRET = #{appSecret}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+    </set>
+    where CFG_ID = #{cfgId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_CONFIG
+    where CFG_ID = #{cfgId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信账号配置信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_CONFIG
+    set DELETE_FLAG = -1
+    where CFG_ID = #{cfgId,jdbcType=VARCHAR}
+  </update>
+</mapper>

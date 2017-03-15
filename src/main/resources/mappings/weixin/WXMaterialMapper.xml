@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXMaterialMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+  	<result column="MEDIA_ID" property="mediaId" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="SUB_TYPE" property="subType" jdbcType="VARCHAR"/>
+	<result column="GROUP_ID" property="groupId" jdbcType="VARCHAR"/>
+	<result column="LOCAL_URL" property="localUrl" jdbcType="VARCHAR"/>
+	<result column="CATEGORY" property="category" jdbcType="VARCHAR"/>
+	<result column="VIDEO_TAGS" property="videoTags" jdbcType="VARCHAR"/>
+	<result column="VIDEO_INSTRU" property="videoInstru" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	
+  </resultMap>
+
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="mediaId != null" >
+		 AND MEDIA_ID = #{mediaId,jdbcType=VARCHAR}
+	 </if>
+	<if test="name != null and name !=''" >
+		  AND NAME LIKE '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="createUser != null and createUser!=''" >
+		 AND CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+	<if test="materialId != null and materialId !=''" >
+		 AND MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+	 </if>
+	<if test="subType != null" >
+		 AND SUB_TYPE = #{subType,jdbcType=VARCHAR}
+	 </if>
+	<if test="groupId != null" >
+		 AND GROUP_ID = #{groupId,jdbcType=VARCHAR}
+	 </if>
+	<if test="localUrl != null" >
+		 AND LOCAL_URL = #{localUrl,jdbcType=VARCHAR}
+	 </if>
+	<if test="category != null" >
+		 AND CATEGORY = #{category,jdbcType=VARCHAR}
+	 </if>
+	<if test="videoTags != null" >
+		 AND VIDEO_TAGS = #{videoTags,jdbcType=VARCHAR}
+	 </if>
+	<if test="videoInstru != null" >
+		 AND VIDEO_INSTRU = #{videoInstru,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	 <if test="keyword != null and keyword !=''" >
+		 AND MATERIAL_ID IN
+	     (SELECT DISTINCT art.MATERIAL_ID
+	          FROM T_WX_ARTICLES art
+	         WHERE (
+	         		art.TITLE LIKE CONCAT(CONCAT('%',#{keyword}),'%')  
+	         		OR art.DIGEST LIKE CONCAT(CONCAT('%',#{keyword}),'%') 
+	         		OR art.AUTHOR LIKE CONCAT(CONCAT('%',#{keyword}),'%')
+	         )
+	     )
+	 </if>    
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	MEDIA_ID,NAME,CREATE_USER,MATERIAL_ID,SUB_TYPE,GROUP_ID,LOCAL_URL,CATEGORY,VIDEO_TAGS,VIDEO_INSTRU,CREATE_TIME
+  </sql>
+  
+  <!-- 分页查询微信素材表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_MATERIAL
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+     	order by CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信素材表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_MATERIAL
+    where MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信素材表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_MATERIAL
+	    <if test="_parameter != null" >
+     		<include refid="Example_Where_Clause" />
+   		</if>
+  </select>
+  
+  <!-- 查询所有微信素材表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_MATERIAL 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信素材表编码,查询微信素材表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_MATERIAL
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="materialId != null" >
+    	and MATERIAL_ID != #{materialId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信素材表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_MATERIAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MATERIAL_ID,
+      <if test="mediaId != null"> MEDIA_ID, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="subType != null"> SUB_TYPE, </if>
+	<if test="groupId != null"> GROUP_ID, </if>
+	<if test="localUrl != null"> LOCAL_URL, </if>
+	<if test="category != null"> CATEGORY, </if>
+	<if test="videoTags != null"> VIDEO_TAGS, </if>
+	<if test="videoInstru != null"> VIDEO_INSTRU, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{materialId},
+     <if test="mediaId != null"> #{mediaId,jdbcType=VARCHAR}, </if>
+	<if test="name != null"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="subType != null"> #{subType,jdbcType=VARCHAR}, </if>
+	<if test="groupId != null"> #{groupId,jdbcType=VARCHAR}, </if>
+	<if test="localUrl != null"> #{localUrl,jdbcType=VARCHAR}, </if>
+	<if test="category != null"> #{category,jdbcType=VARCHAR}, </if>
+	<if test="videoTags != null"> #{videoTags,jdbcType=VARCHAR}, </if>
+	<if test="videoInstru != null"> #{videoInstru,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信素材表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_MATERIAL
+     <set >
+    <if test="mediaId != null and mediaId != ''">MEDIA_ID = #{mediaId,jdbcType=VARCHAR}, </if>
+	<if test="name != null and name != ''">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null and createUser != ''">CREATE_USER = #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="subType != null and subType != '' ">SUB_TYPE = #{subType,jdbcType=VARCHAR}, </if>
+	<if test="groupId != null and groupId != '' ">GROUP_ID = #{groupId,jdbcType=VARCHAR}, </if>
+	<if test="localUrl != null and localUrl != ''">LOCAL_URL = #{localUrl,jdbcType=VARCHAR}, </if>
+	<if test="category != null and category != ''">CATEGORY = #{category,jdbcType=VARCHAR}, </if>
+	<if test="videoTags != null and videoTags != ''">VIDEO_TAGS = #{videoTags,jdbcType=VARCHAR}, </if>
+	<if test="videoInstru != null and videoInstru != ''">VIDEO_INSTRU = #{videoInstru,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and createTime != ''">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+    </set>
+    where MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_MATERIAL
+    where MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信素材表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_MATERIAL
+    set DELETE_FLAG = -1
+    where MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 增加微信素材表之图片 -->  
+  <insert id="insertImage" parameterType="java.util.Map" >
+    insert into T_WX_MATERIAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MATERIAL_ID,
+    <if test="mediaId != null and mediaId !=''"> MEDIA_ID, </if>
+	<if test="name != null and name !=''"> NAME, </if>
+	<if test="createUser != null and createUser != ''"> CREATE_USER, </if>
+	<if test="groupId != null and groupId != ''"> GROUP_ID, </if>
+	<if test="localUrl != null and localUrl !=''"> LOCAL_URL, </if>
+	<if test="category != null and category != ''"> CATEGORY, </if>
+	<if test="createTime != null and createTime != ''"> CREATE_TIME, </if>
+	<if test="remoteUrl != null and remoteUrl != ''"> REMOTE_URL, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{materialId},
+    <if test="mediaId != null and mediaId !=''"> #{mediaId,jdbcType=VARCHAR}, </if>
+	<if test="name != null and name !=''"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null and createUser !=''"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="groupId != null and groupId != ''"> #{groupId,jdbcType=VARCHAR}, </if>
+	<if test="localUrl != null and localUrl !=''"> #{localUrl,jdbcType=VARCHAR}, </if>
+	<if test="category != null and category != ''"> #{category,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and createTime != ''"> #{createTime}, </if>
+    <if test="remoteUrl != null and remoteUrl != ''"> #{remoteUrl,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  
+    
+     <!-- 查询微信素材表之图片 不需要分页-->
+  
+  <select id="getImageList" resultMap="BaseResultMap" >
+  <include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    t.MATERIAL_ID as "materialId"
+	    ,t.MEDIA_ID as "mediaId"
+	    ,t.NAME as "name"
+	    ,t.CREATE_USER as "createUser"
+	    ,t.GROUP_ID as "groupId"
+	    ,t.LOCAL_URL as "localUrl"
+	    ,t.CATEGORY as "category"
+	    ,t.CREATE_TIME as "createTime"
+	    ,g.GROUP_NAME as "groupName"
+	    from T_WX_MATERIAL  t
+	    left join T_WX_MTRL_IMG_GROUP g
+	    on t.GROUP_ID=g.GROUP_ID
+        where CATEGORY='image' 
+     <if test="groupId != null and groupId !=''" >
+		 AND t.GROUP_ID = #{groupId,jdbcType=VARCHAR}
+	 </if> 
+     <if test="name != null and name != ''" >
+		 AND t.name LIKE '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	 <if test="mediaId != null and mediaId != ''" >
+		 AND MEDIA_ID = #{mediaId,jdbcType=VARCHAR}
+	 </if>
+	   	order by CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 查询微信素材表总数量之图片 -->
+  
+  <select id="countImageAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_MATERIAL t
+	    left join T_WX_MTRL_IMG_GROUP g
+	    on t.GROUP_ID=g.GROUP_ID
+	    where CATEGORY='image' 
+     <if test="groupId != null and groupId !=''" >
+		 AND t.GROUP_ID = #{groupId,jdbcType=VARCHAR}
+	 </if> 
+     <if test="name != null and name != ''" >
+		 AND t.name LIKE '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+  </select>
+  
+  
+    <!-- 增加微信素材表之音频 -->  
+  <insert id="insertVoice" parameterType="java.util.Map" >
+    insert into T_WX_MATERIAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MATERIAL_ID,
+    <if test="mediaId != null and mediaId !=''"> MEDIA_ID, </if>
+	<if test="name != null and name !=''"> NAME, </if>
+	<if test="createUser != null and createUser !=''"> CREATE_USER, </if>
+	<if test="subType != null and subType != ''"> SUB_TYPE, </if>
+	<if test="localUrl != null and localUrl !=''"> LOCAL_URL, </if>
+	<if test="category != null and category != ''"> CATEGORY, </if>
+	<if test="createTime != null and createTime != ''"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{materialId},
+    <if test="mediaId != null and mediaId !=''"> #{mediaId,jdbcType=VARCHAR}, </if>
+	<if test="name != null and name !=''"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null and createUser !=''"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="subType != null and subType != ''"> #{subType,jdbcType=VARCHAR}, </if>
+	<if test="localUrl != null and localUrl !=''"> #{localUrl,jdbcType=VARCHAR}, </if>
+	<if test="category != null and category != ''"> #{category,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and createTime != ''"> #{createTime}, </if>
+    </trim>
+  </insert>
+  
+  
+  
+    
+    <!-- 增加微信素材表之视频 -->  
+  <insert id="insertVideo" parameterType="java.util.Map" >
+    insert into T_WX_MATERIAL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MATERIAL_ID,
+    <if test="mediaId != null and mediaId !=''"> MEDIA_ID, </if>
+	<if test="name != null and name !=''"> NAME, </if>
+	<if test="createUser != null and createUser !=''"> CREATE_USER, </if>
+	<if test="subType != null and subType != ''"> SUB_TYPE, </if>
+	<if test="videoTags != null and videoTags !=''"> VIDEO_TAGS, </if>
+	<if test="videoInstru != null and videoInstru !=''"> VIDEO_INSTRU, </if>
+	<if test="localUrl != null and localUrl !=''"> LOCAL_URL, </if>
+	<if test="category != null and category != ''"> CATEGORY, </if>
+	<if test="createTime != null and createTime != ''"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{materialId},
+    <if test="mediaId != null and mediaId !=''"> #{mediaId,jdbcType=VARCHAR}, </if>
+	<if test="name != null and name !=''"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null and createUser !=''"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="subType != null and subType != ''"> #{subType,jdbcType=VARCHAR}, </if>
+	<if test="videoTags != null and videoTags !=''"> #{videoTags,jdbcType=VARCHAR}, </if>
+	<if test="videoInstru != null and videoInstru !=''"> #{videoInstru,jdbcType=VARCHAR}, </if>
+	<if test="localUrl != null and localUrl !=''"> #{localUrl,jdbcType=VARCHAR}, </if>
+	<if test="category != null and category != ''"> #{category,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and createTime != ''"> #{createTime}, </if>
+    </trim>
+  </insert>
+  
+  
+  <!-- 查询所有图文类型的素材mediaId -->
+  <select id="getAllNewsMediaId" resultType="java.util.Map">
+	    select 
+	      distinct
+	    MEDIA_ID as mediaId
+	    from T_WX_MATERIAL 
+		where CATEGORY='news' and media_id is not null
+  </select>
+  
+  
+    <update id="updateImageGroup" parameterType="java.util.Map" >
+    update T_WX_MATERIAL
+    set GROUP_ID = #{groupId,jdbcType=VARCHAR} 
+    where MATERIAL_ID in (${materialId})
+  </update>
+  
+    <delete id="deleteImageGroup" parameterType="java.lang.String" >
+    delete from T_WX_MATERIAL
+    where MATERIAL_ID in (${materialId})
+  </delete>
+  
+    <!-- 查询所有图片类型的素材mediaId -->
+  <select id="getAllImageMediaId" resultType="java.util.Map">
+	    select 
+	      distinct
+	    MEDIA_ID as "mediaId"
+	    from T_WX_MATERIAL 
+		where CATEGORY='image' and media_id is not null
+  </select>
+  
+    <!-- 查询所有音频类型的素材mediaId -->
+  <select id="getAllVoiceMediaId" resultType="java.util.Map">
+	    select 
+	      distinct
+	    MEDIA_ID as "mediaId"
+	    from T_WX_MATERIAL 
+		where CATEGORY='voice' and media_id is not null
+  </select>
+  
+    <!-- 查询所有视频类型的素材mediaId -->
+  <select id="getAllVideoMediaId" resultType="java.util.Map">
+	    select 
+	      distinct
+	    MEDIA_ID as "mediaId"
+	    from T_WX_MATERIAL 
+		where CATEGORY='video' and media_id is not null
+  </select>
+      <!-- 通过mediaId查询素材 -->
+  <select id="getByMediaId" resultMap="BaseResultMap" >
+	    select 
+	      <include refid="Base_Column_List" />
+	    from T_WX_MATERIAL 
+		where MEDIA_ID=#{mediaId}
+  </select>
+  
+</mapper>

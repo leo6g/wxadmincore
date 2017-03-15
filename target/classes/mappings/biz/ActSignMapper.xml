@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ActSignMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR"/>
+	<result column="ACT_TYPE" property="actType" jdbcType="VARCHAR"/>
+	<result column="EXT_NUM1" property="extNum1" jdbcType="INTEGER"/>
+	<result column="EXT_STR1" property="extStr1" jdbcType="VARCHAR"/>
+	<result column="BELONG_CITY" property="belongCity" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="OPEN_ID" property="openId" jdbcType="VARCHAR"/>
+	<result column="EXT_STR3" property="extStr3" jdbcType="VARCHAR"/>
+	<result column="EXT_STR2" property="extStr2" jdbcType="VARCHAR"/>
+	<result column="EXT_NUM2" property="extNum2" jdbcType="INTEGER"/>
+	<result column="EXT_NUM3" property="extNum3" jdbcType="INTEGER"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="name != null and name !=''" >
+		 AND NAME LIKE '%'||#{name,jdbcType=VARCHAR}||'%' 
+	 </if>
+	<if test="phoneNumber != null and phoneNumber !=''" >
+		 AND PHONE_NUMBER LIKE '%'||#{phoneNumber,jdbcType=VARCHAR}||'%' 
+	 </if>
+	 <if test="actType != null and actType !=''" >
+		 AND ACT_TYPE = #{actType,jdbcType=VARCHAR} 
+	 </if>
+	<if test="extNum1 != null" >
+		 AND EXT_NUM1 = #{extNum1,jdbcType=INTEGER}
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="extStr1 != null" >
+		 AND EXT_STR1 = #{extStr1,jdbcType=VARCHAR}
+	 </if>
+	<if test="belongCity != null and belongCity !=''" >
+		 AND BELONG_CITY = #{belongCity,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="openId != null" >
+		 AND OPEN_ID = #{openId,jdbcType=VARCHAR}
+	 </if>
+	<if test="extStr3 != null" >
+		 AND EXT_STR3 = #{extStr3,jdbcType=VARCHAR}
+	 </if>
+	<if test="extStr2 != null" >
+		 AND EXT_STR2 = #{extStr2,jdbcType=VARCHAR}
+	 </if>
+	<if test="extNum2 != null" >
+		 AND EXT_NUM2 = #{extNum2,jdbcType=INTEGER}
+	 </if>
+	<if test="extNum3 != null" >
+		 AND EXT_NUM3 = #{extNum3,jdbcType=INTEGER}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	NAME,PHONE_NUMBER,ACT_TYPE,EXT_NUM1,ID,EXT_STR1,BELONG_CITY,CREATE_TIME,OPEN_ID,EXT_STR3,EXT_STR2,EXT_NUM2,EXT_NUM3
+  </sql>
+  
+  <!-- 分页查询活动报名 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_ACT_SIGN
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询活动报名 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_ACT_SIGN
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据openId查询活动报名 -->
+  <select id="getByOpenId" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_ACT_SIGN
+    where OPEN_ID = #{openId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询活动报名总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_ACT_SIGN
+	   <if test="_parameter != null" >
+	     <include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有活动报名 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_ACT_SIGN 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据活动报名编码,查询活动报名信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_ACT_SIGN
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加活动报名 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_ACT_SIGN
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="name != null"> NAME, </if>
+	<if test="phoneNumber != null"> PHONE_NUMBER, </if>
+	<if test="extNum1 != null"> EXT_NUM1, </if>
+	<if test="extStr1 != null"> EXT_STR1, </if>
+	<if test="belongCity != null"> BELONG_CITY, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="openId != null"> OPEN_ID, </if>
+	<if test="extStr3 != null"> EXT_STR3, </if>
+	<if test="extStr2 != null"> EXT_STR2, </if>
+	<if test="extNum2 != null"> EXT_NUM2, </if>
+	<if test="extNum3 != null"> EXT_NUM3, </if>
+	<if test="actType != null"> ACT_TYPE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="name != null"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null"> #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="extNum1 != null"> #{extNum1,jdbcType=INTEGER}, </if>
+	<if test="extStr1 != null"> #{extStr1,jdbcType=VARCHAR}, </if>
+	<if test="belongCity != null"> #{belongCity,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="openId != null"> #{openId,jdbcType=VARCHAR}, </if>
+	<if test="extStr3 != null"> #{extStr3,jdbcType=VARCHAR}, </if>
+	<if test="extStr2 != null"> #{extStr2,jdbcType=VARCHAR}, </if>
+	<if test="extNum2 != null"> #{extNum2,jdbcType=INTEGER}, </if>
+	<if test="extNum3 != null"> #{extNum3,jdbcType=INTEGER}, </if>
+	<if test="actType != null"> #{actType,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新活动报名 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_ACT_SIGN
+     <set >
+      <if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="extNum1 != null">EXT_NUM1 = #{extNum1,jdbcType=INTEGER}, </if>
+	<if test="extStr1 != null">EXT_STR1 = #{extStr1,jdbcType=VARCHAR}, </if>
+	<if test="belongCity != null">BELONG_CITY = #{belongCity,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="openId != null">OPEN_ID = #{openId,jdbcType=VARCHAR}, </if>
+	<if test="extStr3 != null">EXT_STR3 = #{extStr3,jdbcType=VARCHAR}, </if>
+	<if test="extStr2 != null">EXT_STR2 = #{extStr2,jdbcType=VARCHAR}, </if>
+	<if test="extNum2 != null">EXT_NUM2 = #{extNum2,jdbcType=INTEGER}, </if>
+	<if test="extNum3 != null">EXT_NUM3 = #{extNum3,jdbcType=INTEGER}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_ACT_SIGN
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除活动报名 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_ACT_SIGN
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

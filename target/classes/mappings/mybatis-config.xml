@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 全局参数 -->
+	
+	
+	<settings>
+		<!-- 使全局的映射器启用或禁用缓存。 -->
+		<setting name="cacheEnabled" value="true" />
+
+		<!-- 全局启用或禁用延迟加载。当禁用时，所有关联对象都会即时加载。 -->
+		<setting name="lazyLoadingEnabled" value="true" />
+
+		<!-- 当启用时，有延迟加载属性的对象在被调用时将会完全加载任意属性。否则，每种属性将会按需要加载。 -->
+		<setting name="aggressiveLazyLoading" value="true" />
+
+		<!-- 是否允许单条sql 返回多个数据集 (取决于驱动的兼容性) default:true -->
+		<setting name="multipleResultSetsEnabled" value="true" />
+
+		<!-- 是否可以使用列的别名 (取决于驱动的兼容性) default:true -->
+		<setting name="useColumnLabel" value="true" />
+
+		<!-- 允许JDBC 生成主键。需要驱动器支持。如果设为了true，这个设置将强制使用被生成的主键，有一些驱动器不兼容不过仍然可以执行。 default:false -->
+		<setting name="useGeneratedKeys" value="false" />
+
+		<!-- 指定 MyBatis 如何自动映射 数据基表的列 NONE：不隐射 PARTIAL:部分 FULL:全部 -->
+		<setting name="autoMappingBehavior" value="PARTIAL" />
+
+		<!-- 这是默认的执行类型 （SIMPLE: 简单； REUSE: 执行器可能重复使用prepared statements语句；BATCH: 
+			执行器可以重复执行语句和批量更新） -->
+		<setting name="defaultExecutorType" value="SIMPLE" />
+
+		<!-- 使用驼峰命名法转换字段。 -->
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+
+		<!-- 设置本地缓存范围 session:就会有数据的共享 statement:语句范围 (这样就不会有数据的共享 ) defalut:session -->
+		<setting name="localCacheScope" value="SESSION" />
+
+		<!-- 设置但JDBC类型为空时,某些驱动程序 要指定值,default:OTHER，插入空值时不需要指定类型 -->
+		<setting name="jdbcTypeForNull" value="NULL" />
+		<setting name="logImpl" value="LOG4J2" />
+	</settings>
+	
+	<typeHandlers>
+		<!-- 
+		<typeHandler jdbcType="CLOB" javaType ="java.lang.String"  handler ="com.lfc.wxadmincore.common.utils.OracleClobTypeHandler" />
+		 -->
+	</typeHandlers>
+
+	<!-- 配置映射文件 -->
+	<mappers>
+		<mapper resource="mappings/commonOracleMap.xml" />
+		<!-- 用户管理 -->
+		<mapper resource="mappings/system/ManagerMapper.xml" />
+		<!-- 菜单管理 -->
+		<mapper resource="mappings/system/MenuMapper.xml" />
+		<!-- 按钮管理 -->
+		<mapper resource="mappings/system/ButtonOperMapper.xml" />
+		<!-- 角色管理 -->
+		<mapper resource="mappings/system/RoleMapper.xml" />
+		<!-- 组织机构管理 -->
+		<mapper resource="mappings/system/DepartMapper.xml" />
+		<!-- 机构级别管理 -->
+		<mapper resource="mappings/system/DepartLevelMapper.xml" />
+		<!-- 职位管理 -->
+		<mapper resource="mappings/system/PositionMapper.xml" />
+		<!-- 数据字典管理 -->
+		<mapper resource="mappings/system/DictionaryMapper.xml" />
+		<!-- 微信账号配置信息 -->
+		<mapper resource="mappings/weixin/WXConfigMapper.xml" />
+		<!-- 微信菜单管理  -->
+		<mapper resource="mappings/weixin/WXMenusMapper.xml" />
+		<!-- 微信图文模板 -->
+		<mapper resource="mappings/weixin/WXNewsTemplatesMapper.xml" />
+		<!-- 微信图文详情、文章内容 -->
+		<mapper resource="mappings/weixin/WXNewsItemsMapper.xml" />
+		<!-- 微信文章管理 -->
+		<mapper resource="mappings/weixin/WXArticleMapper.xml" />
+		<!-- 微信自动回复消息模版管理 --> 
+		<mapper resource="mappings/weixin/WXAutoResponseMapper.xml" />
+		 <!-- 微信文本模版管理 --> 
+		<mapper resource="mappings/weixin/WXTextTemplatesMapper.xml" />
+		<!-- 微信接口管理 -->
+		<mapper resource="mappings/weixin/WeixinMapper.xml" />
+		<!-- 微信关注语管理 -->
+		<mapper resource="mappings/weixin/WXMaterialMapper.xml" />
+		<!-- 微信被添加自动回复/消息自动回复 YHH--> 
+		<mapper resource="mappings/weixin/WXSubcribeRespMapper.xml" />
+		<!-- 微信关键字自动回复消息 YHH--> 
+		<mapper resource="mappings/weixin/WXKeywordResponseMapper.xml" />
+		<!-- 微信关键字自动回复消息 --> 
+		<mapper resource="mappings/weixin/WXKeywordsRespMapper.xml" />
+		<!-- 微信图文素材管理 -->
+		<mapper resource="mappings/weixin/WXArticleMaterialMapper.xml" />
+		<!-- 微信素材管理 -->
+		<mapper resource="mappings/weixin/WXSubcribeMsgMapper.xml" />
+		<!-- 微信图片素材分组管理 -->
+		<mapper resource="mappings/weixin/WXMtrlImgGroupMapper.xml" />
+		<!-- 微信关注用户管理 -->
+		<mapper resource="mappings/weixin/WXUserMapper.xml" />
+		<!-- 微信用户组管理 -->
+		<mapper resource="mappings/weixin/WXUserGroupMapper.xml" />
+		<!-- 微信用户属性管理 -->
+		<mapper resource="mappings/weixin/WXUserPropertyMapper.xml" />
+		<!-- 信用卡信息发布表管理 -->
+		<!-- <mapper resource="mappings/weixin/WXCardInfoMapper.xml" /> -->
+		<!-- 微信文章点赞信息管理 -->
+		<mapper resource="mappings/weixin/ArticlePraiseMapper.xml" />
+		<!-- 微信文章评论信息管理 -->
+		<mapper resource="mappings/weixin/ArticleRemarkMapper.xml" />
+		
+		<!-- 缴费数据信息 -->
+		<mapper resource="mappings/biz/PaymentInfoMapper.xml"/>
+		
+		<!-- 微信贷款信息 -->
+		<mapper resource="mappings/biz/WXLoanProdInfoMapper.xml" />
+		<!-- 理财产品管理 -->
+		<mapper resource="mappings/biz/FinanceProdMapper.xml" />
+		<!-- 信用卡信息发布表管理 -->
+		<mapper resource="mappings/biz/WXCardInfoMapper.xml" />
+		<!-- 信用卡信息申请表管理 -->
+		<mapper resource="mappings/biz/CardApplierMapper.xml" />
+		<!-- 网点信息管理-->
+		<mapper resource="mappings/biz/NetPointMapper.xml" />
+		 <!-- 存贷款利率信息管理-->
+		<mapper resource="mappings/biz/BIZInterestRateMapper.xml" />
+		<!-- ATM位置信息管理-->
+		<mapper resource="mappings/biz/AtmLocationMapper.xml" />
+		<!-- 特惠商户信息管理-->
+		<mapper resource="mappings/biz/MerchantMapper.xml" />
+		<!-- 审核意见信息管理-->
+		<mapper resource="mappings/biz/BIZAuthInfoMapper.xml" />
+		
+		<!-- ************* 废弃 bengin  ******************* -->
+		<!-- 微网站信息管理-->
+		<mapper resource="mappings/weiweb/BannerMapper.xml" />
+		<!-- 微网站文章信息管理-->
+		<mapper resource="mappings/weiweb/ArticleMapper.xml" />
+		<!-- 微网站模块信息管理-->
+		<mapper resource="mappings/weiweb/ModulesMapper.xml" />
+		<!-- 微网站导航信息管理 -->
+		<mapper resource="mappings/weiweb/NavigatorMapper.xml" />
+		<!-- ************* 废弃end  ******************* -->
+		
+		<!-- *************最新 bengin******************* -->
+		<!-- 微网站广告信息管理-->
+		<mapper resource="mappings/biz/weiweb/BannerMapper.xml" />
+		<!-- 微网站模块信息管理-->
+		<mapper resource="mappings/biz/weiweb/ModulesMapper.xml" />
+		<!-- 微网站文章信息管理-->
+		<mapper resource="mappings/biz/weiweb/ModulesArticleMapper.xml" />
+		<!-- *************最新 end******************* -->
+		
+		<!-- 特惠商户申请信息 -->
+		<mapper resource="mappings/biz/MerchApplierMapper.xml" />
+		<!-- 文章植入广告管理-->
+		<mapper resource="mappings/biz/AdvertisementMapper.xml" />
+		
+		<!-- 个人中心-->
+		<mapper resource="mappings/biz/FicMoneyMapper.xml" />
+
+		
+		<!-- 微信抽奖活动 -->
+		<mapper resource="mappings/biz/AwardActivityMapper.xml"/>
+		<!-- 微信中奖信息 -->
+		<mapper resource="mappings/biz/LuckyDogsMapper.xml"/>
+		
+		
+		 <!-- 邮学堂板块表-->
+		<mapper resource="mappings/biz/study/StudyCategoryMapper.xml" />
+		<!-- 员工推荐-->
+		<mapper resource="mappings/biz/StaffRecomendMapper.xml" />
+		<!-- 微信客服 -->
+		<mapper resource="mappings/weixin/CustomAccountMapper.xml" />
+		<!-- 邮储个金部客户等级信息 -->
+		<mapper resource="mappings/system/CustomerLevelInfoMapper.xml"/>
+		
+		<!-- 微信获取token -->
+		<mapper resource="mappings/weixin/AccessTokenMapper.xml"/>
+		
+		<!-- 邮学堂文章表 -->
+		<mapper resource="mappings/biz/study/StudyArticleMapper.xml"/>
+		<!-- 微信会员用户留言表 -->
+		<mapper resource="mappings/weixin/UserMessageMapper.xml"/>
+		<!-- 劳动竞赛个人排名 -->
+		<mapper resource="mappings/report/TBStaffRecomendR1Mapper.xml"/>
+		<!-- 劳动竞赛地区排名 -->
+		<mapper resource="mappings/report/TBStaffRecomendR2Mapper.xml"/>
+		<!-- 抽奖人员资格信息表-->
+		<mapper resource="mappings/biz/TBizAwardPlayerMapper.xml"/>
+		
+		
+		<!-- 活动报名-->
+		<mapper resource="mappings/biz/ActSignMapper.xml"/>
+		
+		<!-- 短信发送日志-->
+		<mapper resource="mappings/biz/SmsLogMapper.xml"/>
+		<!-- 理财文章推荐-->
+		<mapper resource="mappings/biz/RecommendFinanceMapper.xml"/>
+		<!-- 热点导航-->
+		<mapper resource="mappings/biz/HotNavigatorMapper.xml"/>
+		<!-- 客户权益信息-->
+		<mapper resource="mappings/biz/UserRightsInfoMapper.xml"/>
+		<!-- 图文审批流程信息-->
+		<mapper resource="mappings/biz/AudiProcessMapper.xml"/>
+		
+		<!-- 图文审批流程任务-->
+		<mapper resource="mappings/biz/ProcessTaskMapper.xml"/>
+		<!-- 图文审批流程日志-->
+		<mapper resource="mappings/biz/ProcessLogsMapper.xml"/>
+		<!-- 图文分析 -->
+		<mapper resource="mappings/weixin/WXArticlesStatisticsMapper.xml"/>
+		<!-- 微信客服消息 -->
+		<mapper resource="mappings/weixin/MessageManagerMapper.xml"/>
+		<!-- 预约中奖信息-->
+		<mapper resource="mappings/biz/TmpActivityMapper.xml"/>
+	</mappers>
+
+</configuration>

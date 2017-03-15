@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserRightsInfoMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="CUSTOMER_LEVEL" property="customerLevel" jdbcType="VARCHAR"/>
+	<result column="WX_USER_ID" property="wxUserId" jdbcType="VARCHAR"/>
+	<result column="REMAIN_CNT" property="remainCnt" jdbcType="INTEGER"/>
+	<result column="USED_CNT" property="usedCnt" jdbcType="INTEGER"/>
+	<result column="INIT_CNT" property="initCnt" jdbcType="INTEGER"/>
+	<result column="SERVICE_CODE" property="serviceCode" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="customerLevel != null" >
+		 AND CUSTOMER_LEVEL = #{customerLevel,jdbcType=VARCHAR}
+	 </if>
+	<if test="wxUserId != null" >
+		 AND t.WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="remainCnt != null" >
+		 AND REMAIN_CNT = #{remainCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="usedCnt != null" >
+		 AND USED_CNT = #{usedCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="initCnt != null" >
+		 AND INIT_CNT = #{initCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="serviceCode != null" >
+		 AND SERVICE_CODE = #{serviceCode,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND t.CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND t.CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+	<if test="name != null and name!=''" >
+		 AND u.name like '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	CUSTOMER_LEVEL,WX_USER_ID,ID,REMAIN_CNT,USED_CNT,INIT_CNT,SERVICE_CODE,CREATE_TIME,CREATE_USER
+  </sql>
+  
+  <!-- 分页查询客户权益 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	   select CUSTOMER_LEVEL,
+       t.WX_USER_ID,
+       ID,
+       REMAIN_CNT,
+       USED_CNT,
+       INIT_CNT,
+       SERVICE_CODE,
+       t.CREATE_TIME,
+       t.CREATE_USER,
+       u.name as "name"
+  	   from T_BIZ_USER_RIGHTS_INFO t
+  	   left join T_WX_USER u
+       on t.wx_user_id = u.wx_user_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询客户权益 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_USER_RIGHTS_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询客户权益总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	   select count(1)
+  	   from T_BIZ_USER_RIGHTS_INFO t
+  	   left join T_WX_USER u
+       on t.wx_user_id = u.wx_user_id
+	   <if test="_parameter != null" >
+	     <include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有客户权益 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+       select CUSTOMER_LEVEL,
+       t.WX_USER_ID,
+       ID,
+       REMAIN_CNT,
+       USED_CNT,
+       INIT_CNT,
+       SERVICE_CODE,
+       t.CREATE_TIME,
+       t.CREATE_USER,
+       u.name as "name"
+  	   from T_BIZ_USER_RIGHTS_INFO t
+  	   left join T_WX_USER u
+       on t.wx_user_id = u.wx_user_id
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据客户权益编码,查询客户权益信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_USER_RIGHTS_INFO
+    where SERVICE_CODE = #{serviceCode,jdbcType=VARCHAR}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加客户权益 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_USER_RIGHTS_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="customerLevel != null"> CUSTOMER_LEVEL, </if>
+	<if test="wxUserId != null"> WX_USER_ID, </if>
+	<if test="remainCnt != null"> REMAIN_CNT, </if>
+	<if test="usedCnt != null"> USED_CNT, </if>
+	<if test="initCnt != null"> INIT_CNT, </if>
+	<if test="serviceCode != null"> SERVICE_CODE, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="customerLevel != null"> #{customerLevel,jdbcType=VARCHAR}, </if>
+	<if test="wxUserId != null"> #{wxUserId,jdbcType=VARCHAR}, </if>
+	<if test="remainCnt != null"> #{remainCnt,jdbcType=INTEGER}, </if>
+	<if test="usedCnt != null"> #{usedCnt,jdbcType=INTEGER}, </if>
+	<if test="initCnt != null"> #{initCnt,jdbcType=INTEGER}, </if>
+	<if test="serviceCode != null"> #{serviceCode,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null"> #{createUser,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新客户权益 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_USER_RIGHTS_INFO
+     <set >
+      <if test="customerLevel != null">CUSTOMER_LEVEL = #{customerLevel,jdbcType=VARCHAR}, </if>
+	<if test="wxUserId != null">WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}, </if>
+	<if test="remainCnt != null">REMAIN_CNT = #{remainCnt,jdbcType=INTEGER}, </if>
+	<if test="usedCnt != null">USED_CNT = #{usedCnt,jdbcType=INTEGER}, </if>
+	<if test="initCnt != null">INIT_CNT = #{initCnt,jdbcType=INTEGER}, </if>
+	<if test="serviceCode != null">SERVICE_CODE = #{serviceCode,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_USER_RIGHTS_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteforWXUserId" parameterType="java.lang.String" >
+    delete from T_BIZ_USER_RIGHTS_INFO
+    where WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除客户权益 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_USER_RIGHTS_INFO
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

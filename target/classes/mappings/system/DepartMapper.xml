@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DepartMapper" >
+
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+	    <id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="DEPART_NAME" property="departName" jdbcType="VARCHAR" />
+	    <result column="DEPART_CODE" property="departCode" jdbcType="VARCHAR" />
+	    <result column="PARENT_ID" property="parentId" jdbcType="VARCHAR" />
+	    <result column="DESCN" property="descn" jdbcType="VARCHAR" />
+	    <result column="DEPART_ORDER" property="departOrder" jdbcType="DECIMAL" />
+	    <result column="DELETE_FLAG" property="deleteFlag" jdbcType="DECIMAL" />
+	    <result column="CREATE_TIME" property="createTime" jdbcType="DATE" />
+	    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+	    <result column="LEVEL_RANK" property="levelRank" jdbcType="DECIMAL" />
+  </resultMap>
+  
+  
+  <sql id="Base_Column_List" >
+	    ID, DEPART_NAME, DEPART_CODE, PARENT_ID, DESCN, DEPART_ORDER, DELETE_FLAG, CREATE_TIME, 
+	    UPDATE_TIME,LEVEL_RANK
+  </sql>
+  
+  
+  <!-- 查询一级组织机构信息 -->
+  <select id="getDepartsLevel_1" resultMap="BaseResultMap" >
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM T_S_DEPART
+	    WHERE PARENT_ID = '0'
+	    AND DELETE_FLAG = 0
+	    order by DEPART_ORDER asc
+  </select>
+  
+  
+  <!-- 根据组织机构父ID，查询组织机构数量 -->
+  <select id="getDepartCountByParentId" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	    SELECT COUNT(1) FROM T_S_DEPART
+	    WHERE PARENT_ID = #{parentId, jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0
+  </select>
+  
+  
+  <!-- 根据父ID,查询子集组织机构信息 -->
+  <select id="getDepartListByParentId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM T_S_DEPART
+	    WHERE PARENT_ID = #{parentId, jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0
+	    order by DEPART_ORDER asc
+  </select>
+  
+  
+  <!-- 根据ID，查询组织机构信息 -->
+  <select id="getDepartById" resultType="java.util.Map" parameterType="java.util.Map" >
+	    select 
+	    dep.ID as "id", 
+	    dep.DEPART_NAME as "departName", 
+	    dep.DEPART_CODE as "departCode",
+	    dep.PARENT_ID as "parentId", 
+	    dep.DESCN as "descn", 
+	    dep.DEPART_ORDER as "departOrder",
+	    dep.DELETE_FLAG as "deleteFlag", 
+	    dep.CREATE_TIME as "createTime", 
+	    dep.UPDATE_TIME as "updateTime",
+	    dep.LEVEL_RANK as "levelRank"
+	    from T_S_DEPART dep
+	    where dep.ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  
+  <!-- 根据机构编码，查询组织机构信息 -->
+  <select id="getDepartByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_S_DEPART
+	    where DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0 
+	    <if test="id != null" >
+	    	and ID != #{id,jdbcType=VARCHAR}
+	    </if>
+  </select>
+  
+
+  <!-- 根据机构编码，查询组织机构信息数量 -->
+  <select id="countDepartByCode" resultType="java.lang.Integer" parameterType="java.util.Map" >
+	    select count(1) 
+	    from T_S_DEPART
+	    where DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+	    AND DELETE_FLAG = 0 
+	    <if test="id != null" >
+	    	and ID != #{id,jdbcType=VARCHAR}
+	    </if>
+  </select>
+  
+  <!-- 新增组织机构信息 -->
+  <insert id="insertDepart" parameterType="java.util.Map" >
+    insert into T_S_DEPART
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="departName != null" >
+        DEPART_NAME,
+      </if>
+      <if test="departCode != null" >
+        DEPART_CODE,
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID,
+      </if>
+      <if test="descn != null" >
+        DESCN,
+      </if>
+      <if test="departOrder != null" >
+        DEPART_ORDER,
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG,
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME,
+      </if>
+      <if test="levelRank != null and levelRank != ''" >
+        LEVEL_RANK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="departName != null" >
+        #{departName,jdbcType=VARCHAR},
+      </if>
+      <if test="departCode != null" >
+        #{departCode,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null" >
+        #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="departOrder != null" >
+        #{departOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="deleteFlag != null" >
+        #{deleteFlag,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="levelRank != null and levelRank != ''" >
+        #{levelRank,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  
+  <!-- 新增组织机构级别关系表信息 -->
+  <insert id="insertDepLevelRel" parameterType="java.util.Map" >
+    insert into T_S_REL_DEPART_LEVEL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="departId != null" >
+        DEPART_ID,
+      </if>
+      <if test="levelId != null" >
+        LEVEL_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="departId != null" >
+        #{departId,jdbcType=VARCHAR},
+      </if>
+      <if test="levelId != null" >
+        #{levelId,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from WEIXIN.T_S_DEPART
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 修改组织机构信息 -->
+  <update id="updateDepart" parameterType="java.util.Map" >
+    update T_S_DEPART
+    <set >
+      <if test="departName != null" >
+        DEPART_NAME = #{departName,jdbcType=VARCHAR},
+      </if>
+      <if test="departCode != null" >
+        DEPART_CODE = #{departCode,jdbcType=VARCHAR},
+      </if>
+      <if test="parentId != null" >
+        PARENT_ID = #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null" >
+        DESCN = #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="departOrder != null" >
+        DEPART_ORDER = #{departOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="deleteFlag != null" >
+        DELETE_FLAG = #{deleteFlag,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+      <if test="levelRank != null and levelRank != ''" >
+        LEVEL_RANK = #{levelRank,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 修改组织机构级别关系表信息 -->
+  <update id="updateDepLevelRel" parameterType="java.util.Map" >
+    update T_S_REL_DEPART_LEVEL
+    <set >
+      <if test="levelId != null" >
+        LEVEL_ID = #{levelId,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where DEPART_ID = #{departId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 逻辑删除组织机构信息 -->
+  <update id="logicDelDepart" parameterType="java.util.Map" >
+    update T_S_DEPART
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  
+  
+  
+</mapper>

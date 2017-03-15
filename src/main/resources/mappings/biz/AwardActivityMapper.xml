@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AwardActivityMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ACTIVITY_ID" property="activityId" jdbcType="VARCHAR"/>
+  	<result column="START_DATE" property="startDate" jdbcType="DATE"/>
+	<result column="ACTIVITY_NAME" property="activityName" jdbcType="VARCHAR"/>
+	<result column="COMMENTS" property="comments" jdbcType="VARCHAR"/>
+	<result column="END_DATE" property="endDate" jdbcType="DATE"/>
+	<result column="ACTIVITY_CODE" property="activityCode" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="startDate != null and startDate !=''" >
+		 AND START_DATE = to_date('${startDate}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="activityName != null" >
+		 AND ACTIVITY_NAME = #{activityName,jdbcType=VARCHAR}
+	 </if>
+	<if test="activityId != null" >
+		 AND ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+	 </if>
+	<if test="comments != null" >
+		 AND COMMENTS = #{comments,jdbcType=VARCHAR}
+	 </if>
+	<if test="activityCode != null" >
+		 AND ACTIVITY_CODE = #{activityCode,jdbcType=VARCHAR}
+	 </if>
+	<if test="endDate != null and endDate !=''" >
+		 AND END_DATE = to_date('${endDate}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	START_DATE,ACTIVITY_NAME,ACTIVITY_ID,COMMENTS,END_DATE,ACTIVITY_CODE
+  </sql>
+  
+  <!-- 分页查询微信抽奖活动 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_AWARD_ACTIVITY
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信抽奖活动 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_AWARD_ACTIVITY
+    where ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信抽奖活动总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_AWARD_ACTIVITY
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信抽奖活动 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_AWARD_ACTIVITY 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信抽奖活动编码,查询微信抽奖活动信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_AWARD_ACTIVITY
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="activityId != null" >
+    	and ACTIVITY_ID != #{activityId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信抽奖活动 -->
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_AWARD_ACTIVITY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ACTIVITY_ID,
+	<if test="activityName != null"> ACTIVITY_NAME, </if>
+	<if test="comments != null"> COMMENTS, </if>
+	<if test="activityCode != null"> ACTIVITY_CODE, </if>
+    <if test="startDate != null"> START_DATE, </if>
+	<if test="endDate != null"> END_DATE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{activityId},
+	<if test="activityName != null"> #{activityName,jdbcType=VARCHAR}, </if>
+	<if test="comments != null"> #{comments,jdbcType=VARCHAR}, </if>
+	<if test="activityCode != null"> #{activityCode,jdbcType=VARCHAR}, </if>
+    <if test="startDate != null"> to_date('${startDate}','yyyy-mm-dd hh24:mi:ss'), </if>
+	<if test="endDate != null"> to_date('${endDate}','yyyy-mm-dd hh24:mi:ss'), </if>
+    </trim>
+  </insert>
+  
+  
+  <!-- 增加微信抽奖活动详细 -->
+  <insert id="insertAwardsInfo" parameterType="java.util.Map">
+  	insert into T_BIZ_AWARDS_INFO
+  	<trim prefix="(" suffix=")" suffixOverrides="," >
+       AWARDS_ID,
+      <if test="activityId != null"> ACTIVITY_ID, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="rank != null"> RANK, </if>
+	<if test="amount != null"> AMOUNT, </if>
+    </trim>
+     <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{awardsId},
+     <if test="activityId != null"> #{activityId}, </if>
+	<if test="name != null"> #{name}, </if>
+	<if test="rank != null"> #{rank}, </if>
+	<if test="amount != null"> #{amount} </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信抽奖活动 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_AWARD_ACTIVITY
+     <set >
+      <if test="startDate != null">START_DATE = #{startDate,jdbcType=DATE}, </if>
+	<if test="activityName != null">ACTIVITY_NAME = #{activityName,jdbcType=VARCHAR}, </if>
+	<if test="comments != null">COMMENTS = #{comments,jdbcType=VARCHAR}, </if>
+	<if test="activityCode != null">ACTIVITY_CODE = #{activityCode,jdbcType=VARCHAR}, </if>
+	<if test="endDate != null">END_DATE = #{endDate,jdbcType=DATE}, </if>
+    </set>
+    where ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+  </update>
+  
+  <!-- 删除活动信息表 -->
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_AWARD_ACTIVITY
+    where ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+  </delete>
+  
+  <!-- 删除活动信息对应的奖品信息表 -->
+  <delete id="deleteAwardsInfo" parameterType="java.lang.String" >
+  	 delete from T_BIZ_AWARDS_INFO
+     where ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+  </delete>
+  
+  
+  <!-- 逻辑删除微信抽奖活动 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_AWARD_ACTIVITY
+    set DELETE_FLAG = -1
+    where ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+  </update>
+</mapper>

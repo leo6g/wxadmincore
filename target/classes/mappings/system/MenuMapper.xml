@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MenuMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="MENU_NAME" property="menuName" jdbcType="VARCHAR" />
+    <result column="MENU_URL" property="menuUrl" jdbcType="VARCHAR" />
+    <result column="MENU_ICON" property="menuIcon" jdbcType="VARCHAR" />
+    <result column="MENU_TYPE" property="menuType" jdbcType="DECIMAL" />
+    <result column="MENU_ORDER" property="menuOrder" jdbcType="DECIMAL" />
+    <result column="MENU_LEVEL" property="menuLevel" jdbcType="DECIMAL" />
+    <result column="PARENT_ID" property="parentId" jdbcType="VARCHAR" />
+    <result column="DESCN" property="descn" jdbcType="VARCHAR" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, MENU_NAME, MENU_URL, MENU_ICON, MENU_TYPE, MENU_ORDER, MENU_LEVEL, PARENT_ID, 
+    DESCN, to_char(CREATE_TIME,'yyyy-mm-dd') as CREATE_TIME, to_char(UPDATE_TIME,'yyyy-mm-dd') as UPDATE_TIME
+  </sql>
+  <!-- 根据主键查询菜单信息 -->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+      select 
+     ch.ID as "id", 
+     ch.MENU_NAME as "menuName", 
+     ch.MENU_URL as "menuUrl",
+     ch.MENU_ICON as "menuIcon",
+     ch.MENU_TYPE as "menuType",
+     ch.MENU_ORDER as "menuOrder", 
+     ch.MENU_LEVEL as "menuLevel",
+     ch.PARENT_ID as "parentId", 
+     ch.DESCN as "descn",
+     to_char(ch.CREATE_TIME,'yyyy-mm-dd') as "createTime",
+     to_char(ch.UPDATE_TIME,'yyyy-mm-dd') as "updateTime",
+     pa.menu_name as "parentName"
+    from T_S_MENU ch
+    left join T_S_MENU pa on ch.parent_id=pa.id 
+    where ch.ID = #{id,jdbcType=VARCHAR}
+  </select>
+    <!-- 根据菜单父ID，查询子菜单数量 -->
+  <select id="getMenuCountByParentId" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	    SELECT COUNT(1) FROM T_S_MENU
+	    WHERE PARENT_ID = #{parentId, jdbcType=VARCHAR}
+  </select>
+  
+  
+  <!-- 根据父ID,查询子菜单信息 -->
+  <select id="getMenuListByParentId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM T_S_MENU
+	    WHERE PARENT_ID = #{parentId, jdbcType=VARCHAR} 
+	     order by MENU_ORDER
+  </select>
+  <!-- 根据菜单列表信息 tree 查询父级菜单 menu-level=1-->
+ <select id="selectMenuInfoTree" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from T_S_MENU where menu_level=1 
+    <if test="menuName != null and menuName != ''" >
+        AND MENU_NAME like '%'||#{menuName}||'%' 
+     </if>
+　　　　<if test="beginTime != null and  beginTime != ''">
+            <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+      <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if> 
+      order by MENU_ORDER
+  </select>
+    <!--查询菜单列表信息 -->
+ <select id="selectMenuInfo" parameterType="java.util.Map" resultMap="BaseResultMap">
+	 <include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_S_MENU where 1=1  
+     <if test="menuName != null and menuName != ''" >
+        AND MENU_NAME like '%'||#{menuName}||'%' 
+     </if>
+　　　　<if test="beginTime != null and  beginTime != ''">
+            <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+      <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+	 <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+      <!-- 查询菜单列表信息-总数 -->
+ <select id="selectMenuCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+	  select 
+      count(0) 
+      from T_S_MENU where 1=1  
+     <if test="menuName != null and menuName != ''" >
+        AND MENU_NAME like '%'||#{menuName}||'%'   
+     </if>
+　　　　<if test="beginTime != null and  beginTime != ''">
+            <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+      <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+  </select>
+  <!-- 根据主键删除菜单信息 -->
+  <delete id="deletetMenuInfoById" parameterType="java.lang.String" >
+    delete from T_S_MENU 
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+    <!-- 根据父主键删除菜单信息 -->
+  <delete id="deletetMenuInfoByPId" parameterType="java.lang.String" >
+    delete from T_S_MENU 
+    where PARENT_ID = #{parentId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 插入菜单信息 -->
+  <insert id="insertMenuInfo" parameterType="java.util.Map" >
+    insert into T_S_MENU
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null and id != ''" >
+        ID,
+      </if>
+      <if test="menuName != null and menuName != ''" >
+        MENU_NAME,
+      </if>
+      <if test="menuUrl != null and menuUrl != ''" >
+        MENU_URL,
+      </if>
+      <if test="menuIcon != null and menuIcon != ''" >
+        MENU_ICON,
+      </if>
+      <if test="menuType != null and menuType != ''" >
+        MENU_TYPE,
+      </if>
+      <if test="menuOrder != null and menuOrder != ''" >
+        MENU_ORDER,
+      </if>
+      <if test="menuLevel != null and menuLevel != ''" >
+        MENU_LEVEL,
+      </if>
+      <if test="parentId != null and parentId != ''" >
+        PARENT_ID,
+      </if>
+      <if test="descn != null and descn != ''" >
+        DESCN,
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null and id != ''" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="menuName != null and menuName != ''" >
+        #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="menuUrl != null and menuUrl != ''" >
+        #{menuUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="menuIcon != null and menuIcon != ''" >
+        #{menuIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="menuType != null and menuType != ''" >
+        #{menuType,jdbcType=DECIMAL},
+      </if>
+      <if test="menuOrder != null and menuOrder != ''" >
+        #{menuOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="menuLevel != null and menuLevel != ''" >
+        #{menuLevel,jdbcType=DECIMAL},
+      </if>
+      <if test="parentId != null and parentId != ''" >
+       #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null and descn != ''" >
+        #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  <!-- 更新菜单信息 -->
+  <update id="updateMenuInfoById" parameterType="java.util.Map" >
+    update T_S_MENU
+    <set >
+      <if test="menuName != null and menuName != ''" >
+        MENU_NAME = #{menuName,jdbcType=VARCHAR},
+      </if>
+      <if test="menuUrl != null " >
+        MENU_URL = #{menuUrl,jdbcType=VARCHAR},
+      </if>
+        MENU_ICON = #{menuIcon,jdbcType=VARCHAR},
+      <if test="menuType != null and menuType != ''" >
+        MENU_TYPE = #{menuType,jdbcType=DECIMAL},
+      </if>
+      <if test="menuOrder != null and menuOrder != ''" >
+        MENU_ORDER = #{menuOrder,jdbcType=DECIMAL},
+      </if>
+      <if test="menuLevel != null and menuLevel != ''" >
+        MENU_LEVEL = #{menuLevel,jdbcType=DECIMAL},
+      </if>
+      <if test="parentId != null and parentId != ''" >
+        PARENT_ID = #{parentId,jdbcType=VARCHAR},
+      </if>
+      <if test="descn != null and descn != ''" >
+        DESCN = #{descn,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  
+  
+  <!-- 根据角色ID查询该角色是否关联该菜单 -->
+   <select id="queryPrivInfoByRoleId" parameterType="java.util.Map" resultType="java.lang.Integer">
+	  select 
+      count(0) 
+      from T_S_ROLE_PRIV where type=1  
+        AND PRIV_ID =#{menuId,jdbcType=VARCHAR}  
+        AND ROLE_ID =#{roleId,jdbcType=VARCHAR}  
+   </select>
+   
+   
+     <!-- 根据用户ID 查询该用户所拥有的父菜单-->
+ <select id="selectMenuInfoByUser" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select distinct m.id as "id",
+		m.menu_name as "menuName",
+		m.menu_url as "menuUrl",
+		m.menu_icon as "menuIcon", 
+        m.menu_order as "menuOrder"
+		from t_s_Menu m
+		left join t_s_role_priv p on p.priv_id=m.id 
+		left join t_s_user_role r on r.role_id=p.role_id 
+		where p.type=1 and m.menu_level=1 and r.user_id = #{userId,jdbcType=VARCHAR} 
+		order by m.menu_order
+  </select>
+  
+      <!-- 根据菜单父ID，userID，查询子菜单数量 -->
+  <select id="selectSubMenuCountByUser" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	    SELECT COUNT(1) 
+	    from t_s_Menu m
+		left join t_s_role_priv p on p.priv_id=m.id 
+		left join t_s_user_role r on r.role_id=p.role_id 
+		where p.type=1 
+		and r.user_id = #{userId,jdbcType=VARCHAR} 
+		and m.PARENT_ID = #{parentId,jdbcType=VARCHAR}
+  </select>
+    
+    <!-- 根据父ID，用户ID,查询子菜单信息 -->
+  <select id="selectSubMenuInfoByUser" resultMap="BaseResultMap" parameterType="java.util.Map" >
+		select distinct m.id as "id",
+		m.menu_name as "menuName",
+		m.menu_url as "menuUrl",
+		m.menu_icon as "menuIcon", 
+        m.menu_order as "menuOrder"
+		from t_s_Menu m
+		left join t_s_role_priv p on p.priv_id=m.id 
+		left join t_s_user_role r on r.role_id=p.role_id 
+		where p.type=1 
+		and r.user_id = #{userId,jdbcType=VARCHAR} 
+		and m.PARENT_ID = #{parentId,jdbcType=VARCHAR}     
+		order by m.menu_order
+  </select>
+</mapper>

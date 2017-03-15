@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXTextTemplatesMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="TEXT_TEMP_ID" property="textTempId" jdbcType="VARCHAR"/>
+  	<result column="CONTENT" property="content" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="content != null" >
+		 AND CONTENT = #{content}
+	 </if>
+	<if test="name != null" >
+		 AND NAME = #{name}
+	 </if>
+	<if test="textTempId != null" >
+		 AND TEXT_TEMP_ID = #{textTempId}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	CONTENT,NAME,TEXT_TEMP_ID,CREATE_TIME,CREATE_USER
+  </sql>
+  
+  <!-- 分页查询微信文本模版 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_TEXT_TEMPLATES
+	<where>
+		<if test="name != null and name != ''" >
+		 AND NAME like '%'||#{name}||'%' 
+		 </if>
+		 <if test="beginTime != null and  beginTime != ''">
+            <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+	      </if>
+	      <if test="endTime != null and  endTime != ''">
+	            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+	      </if>
+	       <if test="orderByClause != null" >
+		     	order by ${orderByClause}
+		    </if>
+	</where>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信文本模版 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_TEXT_TEMPLATES
+    where TEXT_TEMP_ID = #{textTempId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信文本模版总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_TEXT_TEMPLATES
+    <where>
+	 <if test="name != null and name != ''" >
+	 AND NAME like '%'||#{name}||'%' 
+	 </if>
+	 <if test="beginTime != null and  beginTime != ''">
+          <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+     </if>
+     <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+     </if>
+     <if test="orderByClause != null" >
+	     	order by ${orderByClause}
+	 </if>
+	</where>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信文本模版 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_TEXT_TEMPLATES 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信文本模版编码,查询微信文本模版信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_TEXT_TEMPLATES
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="textTempId != null" >
+    	and TEXT_TEMP_ID != #{textTempId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信文本模版 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_TEXT_TEMPLATES
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       TEXT_TEMP_ID,
+      <if test="content != null"> CONTENT, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{textTempId},
+     <if test="content != null"> #{content}, </if>
+	<if test="name != null"> #{name}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信文本模版 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_TEXT_TEMPLATES
+     <set >
+      <if test="content != null">CONTENT = #{content}, </if>
+	<if test="name != null">NAME = #{name}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+    </set>
+    where TEXT_TEMP_ID = #{textTempId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_TEXT_TEMPLATES
+    where TEXT_TEMP_ID = #{textTempId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信文本模版 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_TEXT_TEMPLATES
+    set DELETE_FLAG = -1
+    where TEXT_TEMP_ID = #{textTempId,jdbcType=VARCHAR}
+  </update>
+</mapper>

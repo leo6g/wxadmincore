@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ManagerMapper">
+
+	  <resultMap id="BaseResultMap" type="java.util.Map" >
+	    <id column="ID" property="id" jdbcType="VARCHAR" />
+	    <result column="USERNAME" property="userName" jdbcType="VARCHAR" />
+	    <result column="PASSWORD" property="passWord" jdbcType="VARCHAR" />
+	    <result column="STATUS" property="status" jdbcType="DECIMAL" />
+	    <result column="VALID_BEGIN_TIME" property="validBeginTime" jdbcType="DATE" />
+	    <result column="VALID_END_TIME" property="validEndTime" jdbcType="DATE" />
+	    <result column="DELETE_FLAG" property="deleteFlag" jdbcType="DECIMAL" />
+	    <result column="CREATE_TIME" property="createTime" javaType="java.sql.Date" jdbcType="TIMESTAMP" />
+	    <result column="UPDATE_TIME" property="updateTime" jdbcType="TIMESTAMP" />
+	    <result column="REAL_NAME" property="realName" jdbcType="VARCHAR" />
+	    <result column="SEX" property="sex" jdbcType="DECIMAL" />
+	    <result column="BIRTHDAY" property="birthday" jdbcType="DATE" />
+	    <result column="EMAIL" property="email" jdbcType="VARCHAR" />
+	    <result column="TEL_PHONE" property="telPhone" jdbcType="VARCHAR" />
+	    <result column="USER_ID" property="userId" jdbcType="VARCHAR" />
+	    <result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR" />
+	    <result column="OPEN_ID" property="openId" jdbcType="VARCHAR" />
+	    <result column="CODE_IMG" property="codeImg" jdbcType="VARCHAR" />
+	  </resultMap>
+	  
+	  
+	  <sql id="Base_Column_List" >
+	    u.ID as "id", 
+	    USERNAME as "userName", 
+	    PASSWORD as "passWord", 
+	    STATUS as "status", 
+	    to_char(u.VALID_BEGIN_TIME,'yyyy-mm-dd') as "validBeginTime",
+	    to_char(u.VALID_END_TIME,'yyyy-mm-dd') as "validEndTime",
+	    DELETE_FLAG as "deleteFlag", 
+	    to_char(u.CREATE_TIME,'yyyy-mm-dd HH:mm:ss') as "createTime",
+	    to_char(u.UPDATE_TIME,'yyyy-mm-dd HH:mm:ss') as "updateTime",
+	    REAL_NAME as "realName", 
+	    SEX as "sex", 
+	    BIRTHDAY as "birthday", 
+	    EMAIL as "email", 
+	    TEL_PHONE as "telPhone", 
+	    USER_ID as "userId",
+	    PHONE_NUMBER as "phoneNumber",
+	    OPEN_ID as "openId",
+	    CODE_IMG as "codeImg"
+	  </sql>
+	  
+	  
+	  <!-- 用户登录，查询用户是否存在 -->
+	  <select id="login" resultType="java.util.Map" parameterType="java.util.Map" >
+	  		select 
+		    	u.ID as "id",
+		    	u.USERNAME as "userName",
+		    	u.PASSWORD as "passWord",
+		    	u.STATUS as "status",
+		    	to_char(u.VALID_BEGIN_TIME,'yyyy-mm-dd') as "validBeginTime",
+		    	to_char(u.VALID_END_TIME,'yyyy-mm-dd') as "validEndTime",
+		    	u.DELETE_FLAG as "deleteFlag",
+		    	to_char(u.CREATE_TIME,'yyyy-mm-dd HH:mm:ss') as "createTime",
+		    	to_char(u.UPDATE_TIME,'yyyy-mm-dd HH:mm:ss') as "updateTime",
+		    	upro.REAL_NAME as "realName",
+		    	upro.SEX as "sex",
+		    	to_char(upro.BIRTHDAY,'yyyy-mm-dd') as "birthday",
+		    	upro.EMAIL as "email",
+		    	upro.TEL_PHONE as "telPhone",
+		    	upro.CODE_IMG as "codeImg",
+		    	pos.ID as "positionId",
+		    	pos.POZ_NAME as "positionName",
+		    	<!-- 避免因一个用户多个部门出错 -->
+		    	<!-- dep.ID as "departId",
+		    	dep.DEPART_NAME as "departName", -->
+		    	upro.PHONE_NUMBER as "phoneNumber"
+		    from T_S_USER u
+		    left join T_S_USER_PROPERTY upro ON u.ID = upro.USER_ID
+		    left join T_S_USER_POSZ upos ON u.ID = upos.USER_ID
+		    left join T_S_POSITION pos on pos.ID = upos.POSZ_ID
+		    <!-- left join T_S_DEPART_USER du on u.ID = du.USER_ID
+		    left join T_S_DEPART dep on dep.ID = du.DEPART_ID -->
+		    where u.DELETE_FLAG=0 
+           	<![CDATA[ and u.VALID_BEGIN_TIME <= SYSDATE ]]>
+           	<![CDATA[ and u.VALID_END_TIME >= SYSDATE ]]>
+	        and u.USERNAME = #{userName}
+	        and u.PASSWORD = #{passWord}
+	  </select>
+	  
+	  
+	  <!-- 分页查询用户列表信息 -->
+	  <select id="getList" resultType="java.util.Map" parameterType="java.util.Map">
+	    <include refid="common.Oracle_Pagination_Head" />
+		    select 
+		    <include refid="Base_Column_List" />
+		    from T_S_USER u left join T_S_USER_PROPERTY y on y.USER_ID=u.id
+		    where u.DELETE_FLAG=0 
+		    <if test="userName != null and userName != ''" >
+	        	and u.USERNAME like CONCAT(CONCAT('%',#{userName}),'%')
+	      	</if>
+	      	<if test="createTimeBegin != null and  createTimeBegin != ''">
+            	<![CDATA[ AND u.CREATE_TIME >= to_date(#{createTimeBegin,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+		    </if>
+		    <if test="createTimeEnd != null and  createTimeEnd != ''">
+		        <![CDATA[ AND u.CREATE_TIME <= to_date(#{createTimeEnd,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+		    </if>
+		    order by u.CREATE_TIME desc,USERNAME desc
+	    <include refid="common.Oracle_Pagination_Tail" />
+	  </select>
+	  
+	  
+	  <!-- 查询用户总数量 -->
+	  <select id="countTotalManager" resultType="java.lang.Integer" >
+		    select count(1)
+		    from T_S_USER u left join T_S_USER_PROPERTY y on y.USER_ID=u.id
+		    where u.DELETE_FLAG=0 
+		    <if test="userName != null and userName != ''" >
+	        	and u.USERNAME like CONCAT(CONCAT('%',#{userName}),'%')
+	      	</if>
+	      	<if test="createTimeBegin != null and  createTimeBegin != ''">
+            	<![CDATA[ AND u.CREATE_TIME >= to_date(#{createTimeBegin,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+		    </if>
+		    <if test="createTimeEnd != null and  createTimeEnd != ''">
+		        <![CDATA[ AND u.CREATE_TIME <= to_date(#{createTimeEnd,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+		    </if>
+	  </select>
+	  
+	  
+	  <!-- 根据用户名，查询用户数量 -->
+	  <select id="countByUserName" resultType="java.lang.Integer" parameterType="java.util.Map" >
+		    select count(1)
+		    from T_S_USER u left join T_S_USER_PROPERTY y on y.USER_ID=u.id
+		    where u.DELETE_FLAG=0 
+		    <if test="userName != null and userName != ''" >
+	        	and u.USERNAME = #{userName}
+	      	</if>
+	      	<if test="id != null and id != ''" >
+	        	and u.ID != #{id}
+	      	</if>
+	  </select>
+	  
+	  <!-- 查询客户经理列表 -->
+	  <select id="getTask" resultType="java.util.Map">
+	  	   select u.real_name as "realName", u.user_id as "userId" ,sd.depart_name as "departName"
+	  	   from T_S_USER_PROPERTY u
+	       left join t_s_user_role r on u.user_id = r.user_id
+	  	   left join T_S_ROLE ur on ur.id = r.role_id
+	  	   left join T_S_DEPART_USER d on d.user_id = u.user_id
+		   left join t_s_depart sd on sd.id = d.depart_id
+	 	   where ur.role_code = #{roleCode,jdbcType=VARCHAR}
+	 	    <if test="departId != null and departId != ''" >
+		    and d.depart_id in
+		    <foreach  item="item" collection="departId" index="index"  open="(" separator="," close=")">
+			 	#{item}
+			 </foreach>
+	      	</if>
+	  </select>
+  	
+  	<!-- 根据parentId查询机构id -->
+  	<select id="getInfoByParentId" resultType="java.util.Map" parameterType="java.util.Map">
+  		select t.id as "id" from T_S_DEPART t where t.parent_id = #{parentId,jdbcType=VARCHAR}
+  	</select>
+	  
+	  <!-- 新增用户信息 -->
+	  <insert id="insertManager" parameterType="java.util.Map" >
+	    insert into T_S_USER
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="id != null and id != ''" >
+	        ID,
+	      </if>
+	      <if test="userName != null and userName != ''" >
+	        USERNAME,
+	      </if>
+	      <if test="passWord != null and passWord != ''" >
+	        PASSWORD,
+	      </if>
+	      <if test="status != null and status != ''" >
+	        STATUS,
+	      </if>
+	      <if test="validBeginTime != null and validBeginTime != ''" >
+	        VALID_BEGIN_TIME,
+	      </if>
+	      <if test="validEndTime != null and validEndTime != ''" >
+	        VALID_END_TIME,
+	      </if>
+	      <if test="deleteFlag != null" >
+	        DELETE_FLAG,
+	      </if>
+	      <if test="createTime != null and createTime != ''" >
+	        CREATE_TIME,
+	      </if>
+	      <if test="updateTime != null and updateTime != ''" >
+	        UPDATE_TIME,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="id != null and id != ''" >
+	        #{id,jdbcType=VARCHAR},
+	      </if>
+	      <if test="userName != null and userName != ''" >
+	        #{userName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="passWord != null and passWord != ''" >
+	        #{passWord,jdbcType=VARCHAR},
+	      </if>
+	      <if test="status != null and status != ''" >
+	        #{status,jdbcType=DECIMAL},
+	      </if>
+	      <if test="validBeginTime != null and validBeginTime != ''" >
+	        #{validBeginTime,jdbcType=DATE},
+	      </if>
+	      <if test="validEndTime != null and validEndTime != ''" >
+	        #{validEndTime},
+	      </if>
+	      <if test="deleteFlag != null" >
+	        #{deleteFlag},
+	      </if>
+	      <if test="createTime != null and createTime != ''" >
+	        #{createTime},
+	      </if>
+	      <if test="updateTime != null and updateTime != ''" >
+	        #{updateTime},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+	  
+	  <!-- 插入用户的详情信息 -->
+	  <insert id="insertUserProperty" parameterType="java.util.Map" >
+	    insert into T_S_USER_PROPERTY
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="id != null and id != ''" >
+	        ID,
+	      </if>
+	      <if test="realName != null and realName != ''" >
+	        REAL_NAME,
+	      </if>
+	      <if test="sex != null" >
+	        SEX,
+	      </if>
+	      <if test="birthday != null and birthday != ''" >
+	        BIRTHDAY,
+	      </if>
+	      <if test="email != null and email != ''" >
+	        EMAIL,
+	      </if>
+	      <if test="telPhone != null and telPhone != ''" >
+	        TEL_PHONE,
+	      </if>
+	      <if test="userId != null and userId != ''" >
+	        USER_ID,
+	      </if>
+	       <if test="phoneNumber != null and phoneNumber != ''" >
+	        PHONE_NUMBER,
+	      </if>
+	       <if test="openId != null and openId != ''" >
+	        OPEN_ID,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="id != null and id != ''" >
+	        #{id,jdbcType=VARCHAR},
+	      </if>
+	      <if test="realName != null and realName != ''" >
+	        #{realName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sex != null" >
+	        #{sex,jdbcType=DECIMAL},
+	      </if>
+	      <if test="birthday != null and birthday != ''" >
+	        #{birthday,jdbcType=DATE},
+	      </if>
+	      <if test="email != null and email != ''" >
+	        #{email,jdbcType=VARCHAR},
+	      </if>
+	      <if test="telPhone != null and telPhone != ''" >
+	        #{telPhone,jdbcType=VARCHAR},
+	      </if>
+	      <if test="userId != null and userId != ''" >
+	        #{userId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="phoneNumber != null and phoneNumber != ''" >
+	        #{phoneNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="openId != null and openId != ''" >
+	        #{openId,jdbcType=VARCHAR},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+	  
+	  <!-- 新增用户职位信息 -->
+	  <insert id="insertUserPosition" parameterType="java.util.Map" >
+	    insert into T_S_USER_POSZ
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="userId != null and userId != ''" >
+	        USER_ID,
+	      </if>
+	      <if test="positionId != null and positionId != ''" >
+	        POSZ_ID,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="userId != null and userId != ''" >
+	        #{userId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="positionId != null and positionId != ''" >
+	        #{positionId,jdbcType=VARCHAR},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+	  
+	  <!-- 新增部门用户信息 -->
+	  <insert id="insertDepartUser" parameterType="java.util.Map" >
+	    insert into T_S_DEPART_USER
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="userId != null and userId != ''" >
+	        USER_ID,
+	      </if>
+	      <if test="departId != null and departId != ''" >
+	        DEPART_ID,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="userId != null and userId != ''" >
+	        #{userId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="departId != null and departId != ''" >
+	        #{departId,jdbcType=VARCHAR},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+	  <insert id="insertRoleUser" parameterType="java.util.Map">
+    		insert into T_S_USER_ROLE 
+    		 <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="roleId != null and roleId != ''" >
+	        ROLE_ID,
+	      </if>
+	      <if test="userId != null and userId != ''" >
+	        USER_ID,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="roleId != null and roleId != ''" >
+	        #{roleId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="userId != null and userId != ''" >
+	        #{userId,jdbcType=VARCHAR},
+	      </if>
+	    </trim>
+      </insert>
+	  
+	  
+	    <!-- 根据ID,查询用户所有信息-->
+	    <select id="getById" resultType="java.util.Map" parameterType="java.util.Map" >
+		    select 
+		    	u.ID as "id",
+		    	u.USERNAME as "userName",
+		    	u.PASSWORD as "passWord",
+		    	u.STATUS as "status",
+		    	to_char(u.VALID_BEGIN_TIME,'yyyy-mm-dd') as "validBeginTime",
+		    	to_char(u.VALID_END_TIME,'yyyy-mm-dd') as "validEndTime",
+		    	u.DELETE_FLAG as "deleteFlag",
+		    	to_char(u.CREATE_TIME,'yyyy-mm-dd HH:mm:ss') as "createTime",
+		    	to_char(u.UPDATE_TIME,'yyyy-mm-dd HH:mm:ss') as "updateTime",
+		    	upro.REAL_NAME as "realName",
+		    	upro.SEX as "sex",
+		    	to_char(upro.BIRTHDAY,'yyyy-mm-dd') as "birthday",
+		    	upro.EMAIL as "email",
+		    	upro.TEL_PHONE as "telPhone",
+		    	upro.PHONE_NUMBER as "phoneNumber",
+	   		    upro.OPEN_ID as "openId",
+		    	pos.ID as "positionId",
+		    	pos.POZ_NAME as "positionName",
+		    	dep.ID as "departId",
+		    	dep.DEPART_NAME as "departName"
+		    from T_S_USER u
+		    left join T_S_USER_PROPERTY upro ON u.ID = upro.USER_ID
+		    left join T_S_USER_POSZ upos ON u.ID = upos.USER_ID
+		    left join T_S_POSITION pos on pos.ID = upos.POSZ_ID
+		    left join T_S_DEPART_USER du on u.ID = du.USER_ID
+		    left join T_S_DEPART dep on dep.ID = du.DEPART_ID
+		    where u.ID = #{id,jdbcType=VARCHAR}
+  	  </select>
+	  
+	  <!-- 根据条件查询用户基本信息 -->
+	  <select id="getUserInfo" resultType="java.util.Map" parameterType="java.util.Map">
+	  	select su.username as "userName", up.code_img as "codeImg"
+		  from t_s_user su
+		  left join t_s_user_property up
+		    on su.id = up.user_id
+		 where
+		 	su.DELETE_FLAG=0
+			 <if test="userName != null and userName != ''" >
+	        	and su.USERNAME = #{userName}
+	      	</if>
+			 <if test="telPhone != null and telPhone != ''">
+			 	and up.PHONE_NUMBER = #{telPhone}
+			 </if>
+			 <if test="openId != null and openId != ''">
+			 	and up.open_id = #{openId}
+			 </if>
+	  </select>
+	  
+	  <!-- 修改用户基本信息 -->
+	  <update id="updateManager" parameterType="java.util.Map" >
+	    update T_S_USER
+	    <set >
+	      <if test="userName != null and userName != ''" >
+	        USERNAME = #{userName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="passWord != null and passWord != ''" >
+	        PASSWORD = #{passWord,jdbcType=VARCHAR},
+	      </if>
+	      <if test="status != null" >
+	        STATUS = #{status,jdbcType=DECIMAL},
+	      </if>
+	      <if test="validBeginTime != null and validBeginTime != ''" >
+	        VALID_BEGIN_TIME = #{validBeginTime},
+	      </if>
+	      <if test="validEndTime != null and validEndTime != ''" >
+	        VALID_END_TIME = #{validEndTime},
+	      </if>
+	      <if test="deleteFlag != null" >
+	        DELETE_FLAG = #{deleteFlag,jdbcType=DECIMAL},
+	      </if>
+	      <if test="createTime != null and createTime != ''" >
+	        CREATE_TIME = #{createTime},
+	      </if>
+	      <if test="updateTime != null and updateTime != ''" >
+	        UPDATE_TIME = #{updateTime},
+	      </if>
+	    </set>
+	    where ID = #{id,jdbcType=VARCHAR}
+	  </update>
+	  
+	  
+	  <!-- 修改用户详情信息 -->
+	  <update id="updateUserProperty" parameterType="java.util.Map" >
+	    update T_S_USER_PROPERTY
+	    <set >
+	      <if test="realName != null and realName != ''" >
+	        REAL_NAME = #{realName,jdbcType=VARCHAR},
+	      </if>
+	      <if test="sex != null and sex != ''" >
+	        SEX = #{sex,jdbcType=DECIMAL},
+	      </if>
+	      <if test="birthday != null and birthday != ''" >
+	        BIRTHDAY = #{birthday,jdbcType=DATE},
+	      </if>
+	      <if test="email != null and email != ''" >
+	        EMAIL = #{email,jdbcType=VARCHAR},
+	      </if>
+	      <if test="telPhone != null and telPhone != ''" >
+	        TEL_PHONE = #{telPhone,jdbcType=VARCHAR},
+	      </if>
+	      <if test="phoneNumber != null and phoneNumber != ''" >
+	        PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR},
+	      </if>
+	      <if test="telPhone != null and telPhone != ''" >
+	        OPEN_ID = #{OpenId,jdbcType=VARCHAR},
+	      </if>
+	      <if test="codeImg != null and codeImg != ''" >
+	        CODE_IMG = #{codeImg,jdbcType=VARCHAR},
+	      </if>
+	    </set>
+	    where USER_ID = #{userId,jdbcType=VARCHAR}
+	  </update>
+	  
+	  
+	  <!-- 修改用户职位信息 -->
+	  <update id="updateUserPosition" parameterType="java.util.Map" >
+	    update T_S_USER_POSZ
+	    <set >
+	      <if test="positionId != null and positionId != ''" >
+	        POSZ_ID = #{positionId,jdbcType=VARCHAR},
+	      </if>
+	    </set>
+	    where USER_ID = #{userId,jdbcType=VARCHAR}
+	  </update>
+	  
+	  
+	  <!-- 修改部门用户信息 -->
+	  <update id="updateDepartUser" parameterType="java.util.Map" >
+	    update T_S_DEPART_USER
+	    <set >
+	      <if test="departId != null and departId != ''" >
+	        DEPART_ID = #{departId,jdbcType=VARCHAR},
+	      </if>
+	    </set>
+	    where USER_ID = #{userId,jdbcType=VARCHAR}
+	  </update>
+	  
+	  
+	  	  <!--根据用户ID，判断密码是否正确-->
+	  <select id="checkPasswordIsTrue" resultType="java.lang.Integer" parameterType="java.util.Map" >
+		    select count(1)
+		    from T_S_USER u 
+		    where u.DELETE_FLAG=0 
+		    <if test="passWord != null and passWord != ''" >
+	        	and u.PASSWORD = #{passWord}
+	      	</if>
+	      	<if test="id != null and id != ''" >
+	        	and u.ID = #{id}
+	      	</if>
+	  </select>
+	  
+	  
+	  <select id="getUserRoleCodesByOpenId" resultType="java.util.Map" parameterType="java.util.Map">
+	  	select r.ROLE_CODE
+		  from T_S_USER_PROPERTY y
+		  left join T_S_USER u
+		    on y.USER_ID = u.id
+		  left join T_S_USER_ROLE e
+		    on u.id = e.user_id
+		  left join T_S_ROLE r
+		    on e.role_id = r.id
+		 where r.DELETE_FLAG = 0 and y.open_id = #{openId}
+	  </select>
+	  
+	  <select id="getUserDepartCodeByOpenId" resultType="java.util.Map" parameterType="java.util.Map">
+  	  	 select t.DEPART_CODE
+	     from T_S_USER_PROPERTY y
+	     left join T_S_USER u
+	       on y.USER_ID = u.id
+	     left join T_S_DEPART_USER r
+	       on u.id = r.USER_ID
+	     left join T_S_DEPART t
+	       on r.DEPART_ID = t.id
+	     where t.DELETE_FLAG=0 and y.open_id= #{openId}
+	  </select>
+	  
+	   <select id="getUserDepartCodeByUserId" resultType="java.util.Map" parameterType="java.util.Map">
+	  	  select t.DEPART_CODE as "departCode" , s.role_code as "roleCode"
+	       from T_S_USER_PROPERTY y
+	       left join T_S_USER u on y.USER_ID = u.id
+	       left join T_S_DEPART_USER r on u.id = r.user_id
+	       left join T_S_DEPART t on r.DEPART_ID = t.id
+	       left join T_S_USER_ROLE e on u.id = e.user_id
+			   left join T_S_ROLE s on e.role_id = s.id
+	       where t.DELETE_FLAG=0 and y.user_id= #{userId}
+	  </select>
+	  
+	   <select id="getUserByOpenId" resultType="java.util.Map" parameterType="java.util.Map">
+	  	   select y.user_Id as "userId" from T_S_USER_PROPERTY y where y.open_Id= #{openId}
+	  </select>
+	  
+	  
+	  <!-- 根据用户ID,查询角色ID集合 -->
+	  <select id="queryRolesByUserId" resultType="java.util.Map" parameterType="java.util.Map" >
+	    select 
+	    r.ID as "roleId",
+	    r.role_name as "roleName"
+	    from T_S_USER u
+	    inner join T_S_USER_ROLE ur on u.ID = ur.USER_ID
+	    inner join T_S_ROLE r on r.ID = ur.ROLE_ID
+	    where u.status=1 and u.delete_flag=0 and r.delete_flag=0
+	    and u.ID = #{userId,jdbcType=VARCHAR}
+	  </select>
+	  
+	  <!-- 根据用户主键删除角色用户关联信息-->
+	  <delete id="deletetRUByUserId" parameterType="java.lang.String" >
+	    delete from T_S_USER_ROLE 
+	    where USER_ID = #{userId,jdbcType=VARCHAR}
+	  </delete>
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CustomAccountMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="NICK_NAME" property="nickName" jdbcType="VARCHAR"/>
+	<result column="ACCOUNT" property="account" jdbcType="VARCHAR"/>
+	<result column="HEAD_IMG" property="headImg" jdbcType="VARCHAR"/>
+	<result column="PWD" property="pwd" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="nickName != null and nickName!=''" >
+		 AND NICK_NAME like CONCAT(CONCAT('%',#{nickName}),'%')
+	 </if>
+	<if test="account != null and account!=''">
+		 AND ACCOUNT = CONCAT(CONCAT('%',#{account}),'%')
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="headImg != null" >
+		 AND HEAD_IMG = #{headImg,jdbcType=VARCHAR}
+	 </if>
+	<if test="pwd != null" >
+		 AND PWD = #{pwd,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	NICK_NAME,ACCOUNT,ID,HEAD_IMG,PWD
+  </sql>
+  
+  <!-- 分页查询微信客服管理 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_KFACCOUNT
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信客服管理 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_KFACCOUNT
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信客服管理总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_KFACCOUNT
+	  <if test="_parameter != null" >
+     	 <include refid="Example_Where_Clause" />
+   	 </if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信客服管理 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_KFACCOUNT 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信客服管理编码,查询微信客服管理信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_KFACCOUNT
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信客服管理 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_KFACCOUNT
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="nickName != null"> NICK_NAME, </if>
+	<if test="account != null"> ACCOUNT, </if>
+	<if test="headImg != null"> HEAD_IMG, </if>
+	<if test="pwd != null"> PWD, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="nickName != null"> #{nickName,jdbcType=VARCHAR}, </if>
+	<if test="account != null"> #{account,jdbcType=VARCHAR}, </if>
+	<if test="headImg != null"> #{headImg,jdbcType=VARCHAR}, </if>
+	<if test="pwd != null"> #{pwd,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信客服管理 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_KFACCOUNT
+     <set >
+      <if test="nickName != null">NICK_NAME = #{nickName,jdbcType=VARCHAR}, </if>
+	<if test="account != null">ACCOUNT = #{account,jdbcType=VARCHAR}, </if>
+	<if test="headImg != null">HEAD_IMG = #{headImg,jdbcType=VARCHAR}, </if>
+	<if test="pwd != null">PWD = #{pwd,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_KFACCOUNT
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信客服管理 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_KFACCOUNT
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	
+	
+	
+    <!-- 用户管理服务类 -->
+	<bean id="managerService" class="com.lfc.wxadmincore.modules.system.service.impl.ManagerServiceImpl" parent="baseService">
+		<property name="menuService" ref="menuService"/>
+	</bean>
+	 <!-- 菜单管理服务类 -->
+	<bean id="menuService" class="com.lfc.wxadmincore.modules.system.service.impl.MenuServiceImpl" parent="baseService">
+	</bean>
+	 <!--按钮管理服务类 -->
+	<bean id="buttonService" class="com.lfc.wxadmincore.modules.system.service.impl.ButtonServiceImpl" parent="baseService">
+	</bean>
+	 <!--角色管理服务类 -->
+	<bean id="roleService" class="com.lfc.wxadmincore.modules.system.service.impl.RoleServiceImpl" parent="baseService">
+	</bean>
+	<!-- 组织机构服务类 -->
+	<bean id="departService" class="com.lfc.wxadmincore.modules.system.service.impl.DepartServiceImpl" parent="baseService"></bean>
+	<!-- 机构级别服务类 -->
+	<bean id="deplevelService" class="com.lfc.wxadmincore.modules.system.service.impl.DepLevelServiceImpl" parent="baseService"></bean>
+	<!-- 职位服务类 -->
+	<bean id="positionService" class="com.lfc.wxadmincore.modules.system.service.impl.PositionServiceImpl" parent="baseService"></bean>
+	<!-- 数据字典服务类 -->
+	<bean id="dictionaryService" class="com.lfc.wxadmincore.modules.system.service.impl.DictionaryServiceImpl" parent="baseService"></bean>
+	<!-- 微信菜单管理服务类  -->
+	<bean id="wXMenusService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXMenusServiceImpl" parent="baseService"></bean>
+	<!-- 微信图文模板服务类 -->
+	<bean id="wXNewsTemplatesService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXNewsTemplatesServiceImpl" parent="baseService"></bean>
+	<!-- 微信图文详情、文章内容服务类 -->
+	<bean id="wXNewsItemsService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXNewsItemsServiceImpl" parent="baseService"></bean>
+	<!-- 微信文章管理服务类 -->
+	<bean id="wXArticleService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXArticleServiceImpl" parent="baseService"></bean>
+	<!-- 微信账号配置信息 -->
+	<bean id="wXConfigService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXConfigServiceImpl" parent="baseService"></bean>
+	<!-- 微信关注语服务类 -->
+	<!-- 微信自动回复消息模版管理服务类 -->
+	<bean id="wXAutoResponseService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXAutoResponseServiceImpl" parent="baseService"></bean>
+	<!-- 微信文本模版管理服务类 -->
+	<bean id="wXTextTemplatesService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXTextTemplatesServiceImpl" parent="baseService"></bean>
+	<!-- 微信接口管理服务类 -->
+	<bean id="weixinService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WeixinServiceImpl" parent="baseService"></bean>
+	<!-- 微信关注语服务类 -->
+	<bean id="wXSubcribeMsgService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXSubcribeMsgServiceImpl" parent="baseService"></bean>
+	<!-- 微信关键词自动回复消息模版管理服务类 -->
+	<bean id="wXKeywordsRespService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXKeywordsRespServiceImpl" parent="baseService"></bean>
+	<!-- 微信关键词自动回复消息规则设置 -->
+	<bean id="wXKeywordsResponseService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXKeywordsResponseServiceImpl" parent="baseService"></bean>
+	<!-- 微信被关注自动回复消息规则设置 -->
+	<bean id="wXSubscribeRespService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXSubscribeRespServiceImpl" parent="baseService"></bean>
+	<!-- 微信素材服务类 -->
+	<bean id="wXMaterialService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXMaterialServiceImpl" parent="baseService"></bean>
+	<!-- 微信图文素材服务类，之前服务类也不知道写的什么，新增一个来专门写图文素材相关方法 -->
+	<bean id="wXArticleMaterialService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXArticleMaterialServiceImpl" parent="baseService"></bean>
+	<!-- 微信图片素材分组服务类 -->
+	<bean id="wXMtrlImgGroupService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXMtrlImgGroupServiceImpl" parent="baseService"></bean>
+	<!-- 微信用户服务类 -->
+	<bean id="wXUserService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXUserServiceImpl" parent="baseService"></bean>
+	<!-- 微信素材服务类 -->
+	<bean id="wXUserGroupService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXUserGroupServiceImpl" parent="baseService"></bean>
+	<!-- 信用卡信息发布表服务类 -->
+	<!-- <bean id="wXCardInfoService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXCardInfoServiceImpl" parent="baseService"></bean> -->
+	<!-- 微信文章点赞信息管理服务类 -->
+	<bean id="articlePraiseService" class="com.lfc.wxadmincore.modules.weixin.service.impl.ArticlePraiseServiceImpl" parent="baseService"></bean>
+	<!-- 微信文章评论信息管理服务类 -->
+	<bean id="articleRemarkService" class="com.lfc.wxadmincore.modules.weixin.service.impl.ArticleRemarkServiceImpl" parent="baseService"></bean>
+	
+	<!-- 缴费数据信息-->
+	<bean id="paymentInfoService" class="com.lfc.wxadmincore.modules.biz.paymentInfo.service.impl.PaymentInfoServiceImpl" parent="baseService"></bean>
+	
+	<!-- 微信贷款信息服务类 -->
+	<bean id="wXLoanProdInfoService" class="com.lfc.wxadmincore.modules.biz.service.impl.WXLoanProdInfoServiceImpl" parent="baseService"></bean>
+	<!-- 理财产品管理 -->
+	<bean id="financeProdService" class="com.lfc.wxadmincore.modules.biz.service.impl.FinanceProdServiceImpl" parent="baseService"></bean>
+	<!-- 信用卡信息发布表服务类 -->
+	<bean id="wXCardInfoService" class="com.lfc.wxadmincore.modules.biz.service.impl.WXCardInfoServiceImpl" parent="baseService"></bean>
+	<!-- 信用卡信息申请表服务类 -->
+	<bean id="cardApplierService" class="com.lfc.wxadmincore.modules.biz.service.impl.CardApplierServiceImpl" parent="baseService"></bean>
+	<!-- 网点信息管理-->
+	<bean id="netPointService" class="com.lfc.wxadmincore.modules.biz.service.impl.NetPointServiceImpl" parent="baseService"></bean>
+	<!-- 存贷款利率信息管理-->
+	<bean id="bIZInterestRateService" class="com.lfc.wxadmincore.modules.biz.service.impl.BIZInterestRateServiceImpl" parent="baseService"></bean>
+	<!-- ATM位置信息管理-->
+	<bean id="atmLocationService" class="com.lfc.wxadmincore.modules.biz.service.impl.AtmLocationServiceImpl" parent="baseService"></bean>
+	<!-- 特惠商户信息管理-->
+	<bean id="merchantService" class="com.lfc.wxadmincore.modules.biz.service.impl.MerchantServiceImpl" parent="baseService"></bean>
+	<!-- 审核意见信息管理-->
+	<bean id="bIZAuthInfoService" class="com.lfc.wxadmincore.modules.biz.service.impl.BIZAuthInfoServiceImpl" parent="baseService"></bean>
+	
+	<!-- 微网站信息管理-->
+	<bean id="bannerService" class="com.lfc.wxadmincore.modules.weiweb.service.impl.BannerServiceImpl" parent="baseService"></bean>
+	<!-- 微网站文章信息管理-->
+	<bean id="wWArticleService" class="com.lfc.wxadmincore.modules.weiweb.service.impl.ArticleServiceImpl" parent="baseService"></bean>
+	<!-- 微网站模块信息管理-->
+	<bean id="wWModulesService" class="com.lfc.wxadmincore.modules.weiweb.service.impl.ModulesServiceImpl" parent="baseService"></bean>
+	<!-- 微网站导航信息管理-->
+	<bean id="navigatorService" class="com.lfc.wxadmincore.modules.weiweb.service.impl.NavigatorServiceImpl" parent="baseService"></bean>
+	<!-- 微网站导航信息管理-->
+	<bean id="merchApplierService" class="com.lfc.wxadmincore.modules.biz.service.impl.MerchApplierServiceImpl" parent="baseService"></bean>
+	<!-- 文章植入广告管理-->
+	<bean id="advertisementService" class="com.lfc.wxadmincore.modules.biz.service.impl.AdvertisementServiceImpl" parent="baseService"></bean>
+	
+	<!-- 微网站广告信息管理-->
+	<bean id="bizBannerService" class="com.lfc.wxadmincore.modules.biz.weiweb.service.impl.BannerServiceImpl" parent="baseService"></bean>
+	<!-- 微网站模块信息管理-->
+	<bean id="modulesService" class="com.lfc.wxadmincore.modules.biz.weiweb.service.impl.ModulesServiceImpl" parent="baseService"></bean>
+	<!-- 微网站文章信息管理-->
+	<bean id="modulesArticleService" class="com.lfc.wxadmincore.modules.biz.weiweb.service.impl.ModulesArticleServiceImpl" parent="baseService"></bean>
+	
+	<!-- 个人中心-->
+	<bean id="ficMoneyService" class="com.lfc.wxadmincore.modules.biz.personalcenter.service.impl.FicMoneyServiceImpl" parent="baseService"></bean>
+	<!-- 微信抽奖活动 -->
+	<bean id="awardActivityService" class="com.lfc.wxadmincore.modules.biz.award.service.impl.AwardActivityServiceImpl" parent="baseService"></bean>
+	
+	<!-- 员工推荐-->
+	<bean id="staffRecomendService" class="com.lfc.wxadmincore.modules.biz.recommend.service.impl.StaffRecomendServiceImpl" parent="baseService"></bean>
+	
+	<!-- 微信客服 -->
+	<bean id="customAccountService" class="com.lfc.wxadmincore.modules.weixin.service.impl.CustomAccountServiceImpl" parent="baseService"></bean>
+	<!-- 邮储个金部客户等级信息 -->
+	<bean id="customerLevelInfoService" class="com.lfc.wxadmincore.modules.system.service.impl.CustomerLevelInfoServiceImpl" parent="baseService"></bean>
+
+
+	<!-- 邮学堂文章表 -->
+	<bean id="studyArticleService" class="com.lfc.wxadmincore.modules.biz.study.service.impl.StudyArticleServiceImpl" parent="baseService"></bean>
+
+	 <!-- 邮学堂板块表-->
+	<bean id="studyCategoryService" class="com.lfc.wxadmincore.modules.biz.study.service.impl.StudyCategoryServiceImpl" parent="baseService"></bean>
+	<!-- 微信会员用户留言表-->
+	<bean id="userMessageService" class="com.lfc.wxadmincore.modules.weixin.service.impl.UserMessageServiceImpl" parent="baseService"></bean>
+	<!-- 微信获取token-->
+	<bean id="accessTokenService" class="com.lfc.wxadmincore.modules.weixin.service.impl.AccessTokenServiceImpl" parent="baseService"></bean>
+	<!--  劳动竞赛个人排名 -->
+    <bean id="tBStaffRecomendR1Service" class="com.lfc.wxadmincore.modules.report.service.impl.TBStaffRecomendR1ServiceImpl" parent="baseService"></bean>
+    <!-- 劳动竞赛地区排名 -->
+    <bean id="tBStaffRecomendR2Service" class="com.lfc.wxadmincore.modules.report.service.impl.TBStaffRecomendR2ServiceImpl" parent="baseService"></bean>
+    <!-- 微信用户属性 -->
+    <bean id="wXUserPropertyService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXUserPropertyServiceImpl" parent="baseService"></bean>
+    <!-- 中奖信息表 -->
+	<bean id="luckyDogsService" class="com.lfc.wxadmincore.modules.biz.service.impl.LuckyDogsServiceImpl" parent="baseService"></bean>
+	<!-- 抽奖人员资格信息表-->
+	<bean id="tBizAwardPlayerService" class="com.lfc.wxadmincore.modules.biz.award.service.impl.TBizAwardPlayerServiceImpl" parent="baseService"></bean>
+	
+	<!-- 后门查询服务 -->
+	<bean id="backDoorService" class="com.lfc.wxadmincore.modules.biz.service.impl.BackDoorServiceImpl" parent="baseService"></bean>
+	
+	<!-- 图文分析服务 -->
+	<bean id="articlesStatisticsService" class="com.lfc.wxadmincore.modules.weixin.service.impl.WXArticlesStatisticsServiceImpl" parent="baseService"></bean>
+	<!-- 活动报名 -->
+	<bean id="actSignService" class="com.lfc.wxadmincore.modules.biz.service.impl.ActSignServiceImpl" parent="baseService"></bean>
+	
+	<!-- 短信发送日志 -->
+	<bean id="smsLogService" class="com.lfc.wxadmincore.modules.biz.service.impl.SmsLogServiceImpl" parent="baseService"></bean>
+	<!-- 文章推荐设置-->
+	<bean id="recommendFinanceService" class="com.lfc.wxadmincore.modules.biz.service.impl.RecommendFinanceServiceImpl" parent="baseService"></bean>
+	
+	<!-- 热点导航-->
+	<bean id="hotNavigatorService" class="com.lfc.wxadmincore.modules.biz.service.impl.HotNavigatorServiceImpl" parent="baseService"></bean>
+	<!-- 客户权益信息-->
+	<bean id="userRightsInfoService" class="com.lfc.wxadmincore.modules.biz.service.impl.UserRightsInfoServiceImpl" parent="baseService"></bean>
+	<!-- 图文审批流程信息-->
+	<bean id="audiProcessService" class="com.lfc.wxadmincore.modules.biz.service.impl.AudiProcessServiceImpl" parent="baseService"></bean>
+	
+	<bean id="messageService" class="com.lfc.wxadmincore.modules.weixin.service.impl.MessageManagerServiceImpl" parent="baseService"></bean>
+	<!-- 图文审批流程任务-->
+	<bean id="processTaskService" class="com.lfc.wxadmincore.modules.biz.service.impl.ProcessTaskServiceImpl" parent="baseService"></bean>
+	<!-- 图文审批流程日志-->
+	<bean id="processLogsService" class="com.lfc.wxadmincore.modules.biz.service.impl.ProcessLogsServiceImpl" parent="baseService"></bean>
+	<!-- 预约中奖信息-->
+	<bean id="tmpActivityService" class="com.lfc.wxadmincore.modules.biz.service.impl.TmpActivityServiceImpl" parent="baseService"></bean>
+</beans>

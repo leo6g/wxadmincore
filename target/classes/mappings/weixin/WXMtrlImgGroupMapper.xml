@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXMtrlImgGroupMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="GROUP_ID" property="groupId" jdbcType="VARCHAR"/>
+  	<result column="GROUP_NAME" property="groupName" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="groupName != null" >
+		 AND GROUP_NAME = #{groupName,jdbcType=VARCHAR}
+	 </if>
+	<if test="groupId != null" >
+		 AND GROUP_ID = #{groupId,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	GROUP_NAME,GROUP_ID
+  </sql>
+  
+  <!-- 分页查询图片素材分组表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_MTRL_IMG_GROUP
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询图片素材分组表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_MTRL_IMG_GROUP
+    where GROUP_ID = #{groupId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询图片素材分组表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_MTRL_IMG_GROUP
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有图片素材分组表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_MTRL_IMG_GROUP 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据图片素材分组表编码,查询图片素材分组表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_MTRL_IMG_GROUP
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="groupId != null" >
+    	and GROUP_ID != #{groupId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加图片素材分组表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_MTRL_IMG_GROUP
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       GROUP_ID,
+      <if test="groupName != null"> GROUP_NAME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{groupId},
+     <if test="groupName != null"> #{groupName,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新图片素材分组表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_MTRL_IMG_GROUP
+     <set >
+      <if test="groupName != null">GROUP_NAME = #{groupName,jdbcType=VARCHAR}, </if>
+    </set>
+    where GROUP_ID = #{groupId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_MTRL_IMG_GROUP
+    where GROUP_ID = #{groupId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除图片素材分组表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_MTRL_IMG_GROUP
+    set DELETE_FLAG = -1
+    where GROUP_ID = #{groupId,jdbcType=VARCHAR}
+  </update>
+    
+    <!-- 查询每一个分组下面的图片数量 -->
+  
+  <select id="getListInfoById" resultMap="BaseResultMap" >
+  	select g.group_id as "groupId",
+  	       g.group_name as "groupName",
+  	       count(t.group_id) as "countImage" 
+  	       from T_WX_MTRL_IMG_GROUP g  left join T_WX_MATERIAL t
+           on t.group_id=g.group_id and t.category='image' group by g.group_id,g.group_name 
+   union all
+   select 'default',
+          '未分组',
+          count(1) as "countImage" 
+          from  T_WX_MATERIAL t where t.category='image' and t.group_id ='default' 
+	    
+  </select>
+
+</mapper>

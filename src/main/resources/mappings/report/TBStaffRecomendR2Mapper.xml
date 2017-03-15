@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="TBStaffRecomendR2Mapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<result column="OPEN_CNT" property="openCnt" jdbcType="INTEGER"/>
+	<result column="DEPART_NAME" property="departName" jdbcType="VARCHAR"/>
+	<result column="DEPART_CODE" property="departCode" jdbcType="VARCHAR"/>
+	<result column="STATIS_DATE" property="statisDate" jdbcType="DATE"/>
+	<result column="OPEN_CNT_RANK" property="openCntRank" jdbcType="INTEGER"/>
+	<result column="DAY_YESDAY_CNT" property="dayYesdayCnt" jdbcType="INTEGER"/>
+	<result column="OPEN_DAY_CNT" property="openDayCnt" jdbcType="INTEGER"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="openCnt != null and openCnt !=''" >
+		 AND OPEN_CNT = #{openCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="departName != null and departName !=''" >
+		 AND m.DEPART_NAME like '%'||#{departName}||'%' 
+	 </if>
+	<if test="departCode != null and departCode !=''" >
+		 AND DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+	 </if>
+	<!-- <if test="statisDate2 != null and  statisDate2 != ''">
+            <![CDATA[ AND m.STATIS_DATE = to_date(#{statisDate2,jdbcType=DATE},'yyyy-MM-dd')]]>
+      </if>  -->
+	<if test="openCntRank != null and openCntRank!=''" >
+		 AND OPEN_CNT_RANK = #{openCntRank,jdbcType=INTEGER}
+	 </if>
+	<if test="dayYesdayCnt != null and dayYesdayCnt!=''" >
+		 AND DAY_YESDAY_CNT = #{dayYesdayCnt,jdbcType=INTEGER}
+	 </if>
+	<if test="openDayCnt != null and openDayCnt !=''" >
+		 AND OPEN_DAY_CNT = #{openDayCnt,jdbcType=INTEGER}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	OPEN_CNT,DEPART_NAME,DEPART_CODE,STATIS_DATE,OPEN_CNT_RANK,DAY_YESDAY_CNT,OPEN_DAY_CNT
+  </sql>
+  
+  <!-- 分页查询劳动竞赛地区排名 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select m.depart_code,
+       m.depart_name,
+       count(distinct m.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       count(distinct(case
+                        when trunc(m.subscribe_time) = trunc(sysdate) then
+                         m.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 -->
+       count(distinct(case
+                        when trunc(m.subscribe_time) = trunc(sysdate) then
+                         m.open_id
+                      end)) - count(distinct(case
+                                               when trunc(m.subscribe_time) = trunc(sysdate) - 1 then
+                                                m.open_id
+                                             end)) day_yesday_cnt, <!-- 波动=今日关注数量-昨日关注数量 -->
+       rank() over(order by count(distinct m.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       trunc(sysdate) statis_date
+  from (select distinct connect_by_root(c.depart_code) depart_code,
+                        connect_by_root(c.depart_name) depart_name,
+                        k.open_id, <!-- 关注用户id  -->
+                        k.subscribe_time <!-- 关注时间  -->
+          from T_S_DEPART c
+          left join (select distinct t.staff_code,
+                                    t.open_id,
+                                    t.subscribe_time,
+                                    b.depart_id
+                      from t_biz_staff_recomend t,
+                           t_s_user             a,
+                           T_S_DEPART_USER      b,
+                           t_s_user_property    d
+                     where t.staff_code = a.username
+                       and a.id = b.user_id
+                       and a.id = d.user_id) k
+            on (c.id = k.depart_id)
+         where k.staff_code is not null
+         start with c.level_rank = 3
+        connect by prior c.depart_code = c.parent_id) m
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+ group by m.depart_code, m.depart_name
+     	order by OPEN_CNT_RANK 
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  
+  <!-- 查询劳动竞赛地区排名总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select NVL(sum(count(distinct depart_code)),0)
+	    from (select distinct connect_by_root(c.depart_code) depart_code,
+                        connect_by_root(c.depart_name) depart_name,
+                        k.open_id, <!-- 关注用户id  -->
+                        k.subscribe_time <!-- 关注时间  -->
+          from T_S_DEPART c
+          left join (select distinct t.staff_code,
+                                    t.open_id,
+                                    t.subscribe_time,
+                                    b.depart_id
+                      from t_biz_staff_recomend t,
+                           t_s_user             a,
+                           T_S_DEPART_USER      b,
+                           t_s_user_property    d
+                     where t.staff_code = a.username
+                       and a.id = b.user_id
+                       and a.id = d.user_id) k
+            on (c.id = k.depart_id)
+         where k.staff_code is not null
+         start with c.level_rank = 3
+        connect by prior c.depart_code = c.parent_id) m
+	  	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	    </if>
+ group by m.depart_code, m.depart_name
+  </select>
+  
+    <!-- 查询劳动竞赛地区排名 -->
+  
+  <select id="getListAll" resultMap="BaseResultMap" >
+	    select m.depart_code,
+       m.depart_name,
+       count(distinct m.open_id) open_cnt, <!-- 累计关注用户数量 -->
+       count(distinct(case
+                        when trunc(m.subscribe_time) = trunc(sysdate) then
+                         m.open_id
+                      end)) open_day_cnt, <!-- 当日关注用户数量 -->
+       count(distinct(case
+                        when trunc(m.subscribe_time) = trunc(sysdate) then
+                         m.open_id
+                      end)) - count(distinct(case
+                                               when trunc(m.subscribe_time) = trunc(sysdate) - 1 then
+                                                m.open_id
+                                             end)) day_yesday_cnt, <!-- 波动=今日关注数量-昨日关注数量 -->
+       rank() over(order by count(distinct m.open_id) desc) open_cnt_rank, <!-- 按照累计关注用户数量排名 -->
+       trunc(sysdate) statis_date
+  from (select distinct connect_by_root(c.depart_code) depart_code,
+                        connect_by_root(c.depart_name) depart_name,
+                        k.open_id, <!-- 关注用户id  -->
+                        k.subscribe_time <!-- 关注时间  -->
+          from T_S_DEPART c
+          left join (select distinct t.staff_code,
+                                    t.open_id,
+                                    t.subscribe_time,
+                                    b.depart_id
+                      from t_biz_staff_recomend t,
+                           t_s_user             a,
+                           T_S_DEPART_USER      b,
+                           t_s_user_property    d
+                     where t.staff_code = a.username
+                       and a.id = b.user_id
+                       and a.id = d.user_id) k
+            on (c.id = k.depart_id)
+         where k.staff_code is not null
+         start with c.level_rank = 3
+        connect by prior c.depart_code = c.parent_id) m
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+ group by m.depart_code, m.depart_name
+     	order by OPEN_CNT_RANK 
+  </select>
+  
+</mapper>

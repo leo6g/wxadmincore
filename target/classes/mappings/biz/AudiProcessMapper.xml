@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AudiProcessMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="PROCESS_ID" property="processId" jdbcType="VARCHAR"/>
+  	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+	<result column="DEPART_LEVEL" property="departLevel" jdbcType="VARCHAR"/>
+	<result column="CURRENT_NODE" property="currentNode" jdbcType="VARCHAR"/>
+	<result column="STATE" property="state" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="INITIATOR_ID" property="initiatorId" jdbcType="VARCHAR"/>
+	<result column="DEPART_TYPE" property="departType" jdbcType="VARCHAR"/>
+	<result column="INIT_DEPART_CODE" property="initDepartCode" jdbcType="VARCHAR"/>
+	<result column="RECOMMEND_TYPE" property="recommendType" jdbcType="VARCHAR"/>
+	<result column="PUBLISH_DATE" property="publishDate" jdbcType="DATE"/>
+	<result column="DEPART_CODE" property="departCode" jdbcType="VARCHAR"/>
+	<result column="BIZ_TYPE" property="bizType" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="title != null and title != ''" >
+		 AND TITLE like '%'||#{title}||'%'
+	 </if>
+	<if test="materialId != null" >
+		 AND MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+	 </if>
+	<if test="departLevel != null" >
+		 AND DEPART_LEVEL = #{departLevel,jdbcType=VARCHAR}
+	 </if>
+	<if test="processId != null" >
+		 AND PROCESS_ID = #{processId,jdbcType=VARCHAR}
+	 </if>
+	<if test="currentNode != null" >
+		 AND CURRENT_NODE = #{currentNode,jdbcType=VARCHAR}
+	 </if>
+	<if test="state != null" >
+		 AND STATE = #{state,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="initiatorId != null" >
+		 AND INITIATOR_ID = #{initiatorId,jdbcType=VARCHAR}
+	 </if>
+	<if test="departType != null" >
+		 AND DEPART_TYPE = #{departType,jdbcType=VARCHAR}
+	 </if>
+	<if test="initDepartCode != null" >
+		 AND INIT_DEPART_CODE = #{initDepartCode,jdbcType=VARCHAR}
+	 </if>
+	<if test="recommendType != null" >
+		 AND RECOMMEND_TYPE = #{recommendType,jdbcType=VARCHAR}
+	 </if>
+	<if test="publishDate != null and publishDate !=''" >
+		 AND PUBLISH_DATE = to_date('${publishDate}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="departCode != null" >
+		 AND DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+	 </if>
+	<if test="bizType != null" >
+		 AND BIZ_TYPE = #{bizType,jdbcType=VARCHAR}
+	 </if>
+	<if test="beginTime != null and  beginTime != ''">
+         <![CDATA[ AND t.CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+      <if test="endTime != null and  endTime != ''">
+         <![CDATA[ AND t.CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	TITLE,MATERIAL_ID,DEPART_LEVEL,PROCESS_ID,CURRENT_NODE,STATE,CREATE_TIME,INITIATOR_ID,DEPART_TYPE,INIT_DEPART_CODE,RECOMMEND_TYPE,PUBLISH_DATE,DEPART_CODE,BIZ_TYPE
+  </sql>
+  
+  <!-- 分页查询图文审批流程信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+  select TITLE,
+         MATERIAL_ID,
+         DEPART_LEVEL,
+         t.PROCESS_ID,
+         CURRENT_NODE,
+         t.STATE,
+         t.CREATE_TIME,
+         INITIATOR_ID,
+         DEPART_TYPE,
+         INIT_DEPART_CODE,
+         RECOMMEND_TYPE,
+         PUBLISH_DATE,
+         DEPART_CODE,
+         BIZ_TYPE,
+         u.real_name as "name",
+         l.proc_result as"procResult",
+         p.real_name as"taskerName",
+         k.state as"taskState",
+         k.type as "taskType"
+        from T_BIZ_PROCESS t
+        left join t_s_user_property u on t.initiator_id = u.user_id
+        left join T_BIZ_PROC_TASK  k on t.process_id =k.process_id
+        left join t_s_user_property p on k.tasker_id = p.user_id
+        left join T_BIZ_PROC_LOGS  l on t.process_id =l.process_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询图文审批流程信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROCESS
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 根据Id查询图文审批流程信息 -->
+  
+  <select id="getViewById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+       TITLE,
+       MATERIAL_ID,
+       DEPART_LEVEL,
+       PROCESS_ID,
+       CURRENT_NODE,
+       t.STATE,
+       CREATE_TIME,
+       INITIATOR_ID,
+       DEPART_TYPE,
+       INIT_DEPART_CODE,
+       RECOMMEND_TYPE,
+       PUBLISH_DATE,
+       DEPART_CODE,
+       BIZ_TYPE,
+      u.real_name as "name",
+      l.proc_result as"procResult",
+      p.real_name as"taskerName",
+      k.state as"taskState",
+      k.type as "taskType"
+	  from T_BIZ_PROCESS t
+	  left join t_s_user_property u on t.initiator_id = u.user_id
+	  left join T_BIZ_PROC_TASK  k on t.process_id =k.process_id
+	  left join t_s_user_property p on k.tasker_id = p.user_id
+	  left join T_BIZ_PROC_LOGS  l on t.process_id =l.process_id
+      where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询图文审批流程信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_PROCESS t
+	    left join t_s_user_property u on t.initiator_id = u.user_id
+        left join T_BIZ_PROC_TASK  k on t.process_id =k.process_id
+        left join t_s_user_property p on k.tasker_id = p.user_id
+        left join T_BIZ_PROC_LOGS  l on t.process_id =l.process_id
+	   <if test="_parameter != null" >
+	     <include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有图文审批流程信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select TITLE,
+         MATERIAL_ID,
+         DEPART_LEVEL,
+         t.PROCESS_ID,
+         CURRENT_NODE,
+         t.STATE,
+         t.CREATE_TIME,
+         INITIATOR_ID,
+         DEPART_TYPE,
+         INIT_DEPART_CODE,
+         RECOMMEND_TYPE,
+         PUBLISH_DATE,
+         DEPART_CODE,
+         BIZ_TYPE,
+         u.real_name as "name",
+         l.proc_result as"procResult",
+         p.real_name as"taskerName",
+         k.state as"taskState",
+         k.type as "taskType"
+        from T_BIZ_PROCESS t
+        left join t_s_user_property u on t.initiator_id = u.user_id
+        left join T_BIZ_PROC_TASK  k on t.process_id =k.process_id
+        left join t_s_user_property p on k.tasker_id = p.user_id
+        left join T_BIZ_PROC_LOGS  l on t.process_id =l.process_id
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据图文审批流程信息编码,查询图文审批流程信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROCESS
+    where DEPART_CODE = #{departCode,jdbcType=VARCHAR}
+    AND DELETE_FLAG = 0 
+    <if test="processId != null" >
+    	and PROCESS_ID != #{processId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加图文审批流程信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_PROCESS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       PROCESS_ID,
+      <if test="title != null"> TITLE, </if>
+	<if test="materialId != null"> MATERIAL_ID, </if>
+	<if test="departLevel != null"> DEPART_LEVEL, </if>
+	<if test="currentNode != null"> CURRENT_NODE, </if>
+	<if test="state != null"> STATE, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="initiatorId != null"> INITIATOR_ID, </if>
+	<if test="departType != null"> DEPART_TYPE, </if>
+	<if test="initDepartCode != null"> INIT_DEPART_CODE, </if>
+	<if test="recommendType != null and recommendType !=''"> RECOMMEND_TYPE, </if>
+	<if test="publishDate != null"> PUBLISH_DATE, </if>
+	<if test="departCode != null"> DEPART_CODE, </if>
+	<if test="bizType != null"> BIZ_TYPE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{processId},
+     <if test="title != null"> #{title,jdbcType=VARCHAR}, </if>
+	<if test="materialId != null"> #{materialId,jdbcType=VARCHAR}, </if>
+	<if test="departLevel != null"> #{departLevel,jdbcType=VARCHAR}, </if>
+	<if test="currentNode != null"> #{currentNode,jdbcType=VARCHAR}, </if>
+	<if test="state != null"> #{state,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="initiatorId != null"> #{initiatorId,jdbcType=VARCHAR}, </if>
+	<if test="departType != null"> #{departType,jdbcType=VARCHAR}, </if>
+	<if test="initDepartCode != null"> #{initDepartCode,jdbcType=VARCHAR}, </if>
+	<if test="recommendType != null and recommendType !=''"> #{recommendType,jdbcType=VARCHAR}, </if>
+	<if test="publishDate != null"> to_date('${publishDate}','yyyy-mm-dd'), </if>
+	<if test="departCode != null"> #{departCode,jdbcType=VARCHAR}, </if>
+	<if test="bizType != null"> #{bizType,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新图文审批流程信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_PROCESS
+     <set >
+      <if test="title != null">TITLE = #{title,jdbcType=VARCHAR}, </if>
+	<if test="materialId != null">MATERIAL_ID = #{materialId,jdbcType=VARCHAR}, </if>
+	<if test="departLevel != null">DEPART_LEVEL = #{departLevel,jdbcType=VARCHAR}, </if>
+	<if test="currentNode != null">CURRENT_NODE = #{currentNode,jdbcType=VARCHAR}, </if>
+	<if test="state != null">STATE = #{state,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and recommendType !=''">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="initiatorId != null">INITIATOR_ID = #{initiatorId,jdbcType=VARCHAR}, </if>
+	<if test="departType != null">DEPART_TYPE = #{departType,jdbcType=VARCHAR}, </if>
+	<if test="initDepartCode != null">INIT_DEPART_CODE = #{initDepartCode,jdbcType=VARCHAR}, </if>
+	<if test="recommendType != null and recommendType !=''">RECOMMEND_TYPE = #{recommendType,jdbcType=VARCHAR}, </if>
+	<if test="publishDate != null">PUBLISH_DATE = to_date('${publishDate}','yyyy-mm-dd'), </if>
+	<if test="departCode != null">DEPART_CODE = #{departCode,jdbcType=VARCHAR}, </if>
+	<if test="bizType != null">BIZ_TYPE = #{bizType,jdbcType=VARCHAR}, </if>
+    </set>
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_PROCESS
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除图文审批流程信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_PROCESS
+    set DELETE_FLAG = -1
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </update>
+</mapper>

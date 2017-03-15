@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ProcessLogsMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="LOG_ID" property="logId" jdbcType="VARCHAR"/>
+  	<result column="TASK_ID" property="taskId" jdbcType="VARCHAR"/>
+	<result column="PROCESS_ID" property="processId" jdbcType="VARCHAR"/>
+	<result column="PROC_RESULT" property="procResult" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="taskId != null" >
+		 AND TASK_ID = #{taskId,jdbcType=VARCHAR}
+	 </if>
+	<if test="processId != null" >
+		 AND PROCESS_ID = #{processId,jdbcType=VARCHAR}
+	 </if>
+	<if test="logId != null" >
+		 AND LOG_ID = #{logId,jdbcType=VARCHAR}
+	 </if>
+	<if test="procResult != null" >
+		 AND PROC_RESULT = #{procResult,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	TASK_ID,PROCESS_ID,LOG_ID,PROC_RESULT,CREATE_TIME
+  </sql>
+  
+  <!-- 分页查询图文审批流程日志 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_PROC_LOGS
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询图文审批流程日志 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_LOGS
+    where LOG_ID = #{logId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询图文审批流程日志总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_PROC_LOGS
+	   <if test="_parameter != null" >
+	     <include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有图文审批流程日志 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_LOGS 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据图文审批流程日志编码,查询图文审批流程日志信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PROC_LOGS
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="logId != null" >
+    	and LOG_ID != #{logId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加图文审批流程日志 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_PROC_LOGS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       LOG_ID,
+      <if test="taskId != null"> TASK_ID, </if>
+	<if test="processId != null"> PROCESS_ID, </if>
+	<if test="procResult != null"> PROC_RESULT, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{logId},
+     <if test="taskId != null"> #{taskId,jdbcType=VARCHAR}, </if>
+	<if test="processId != null"> #{processId,jdbcType=VARCHAR}, </if>
+	<if test="procResult != null"> #{procResult,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新图文审批流程日志 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_PROC_LOGS
+     <set >
+      <if test="taskId != null">TASK_ID = #{taskId,jdbcType=VARCHAR}, </if>
+	<if test="processId != null">PROCESS_ID = #{processId,jdbcType=VARCHAR}, </if>
+	<if test="procResult != null">PROC_RESULT = #{procResult,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+    </set>
+    where LOG_ID = #{logId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_PROC_LOGS
+    where PROCESS_ID = #{processId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除图文审批流程日志 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_PROC_LOGS
+    set DELETE_FLAG = -1
+    where LOG_ID = #{logId,jdbcType=VARCHAR}
+  </update>
+</mapper>

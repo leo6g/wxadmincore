@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="LuckyDogsMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="AWARDS_ID" property="awardsId" jdbcType="VARCHAR"/>
+	<result column="ACTIVITY_ID" property="activityId" jdbcType="VARCHAR"/>
+	<result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="OPEN_ID" property="openId" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="awardsId != null" >
+		 AND AWARDS_ID = #{awardsId,jdbcType=VARCHAR}
+	 </if>
+	<if test="activityId != null" >
+		 AND ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="phoneNumber != null and phoneNumber != ''" >
+		 AND PHONE_NUMBER like '%'||#{phoneNumber,jdbcType=VARCHAR}||'%' 
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="openId != null" >
+		 AND OPEN_ID = #{openId,jdbcType=VARCHAR}
+	 </if>
+	<if test="activityName != null and activityName != ''" >
+		 AND b.activity_name like '%'||#{activityName,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="name != null and name != ''" >
+		 AND t.name like '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	AWARDS_ID,ACTIVITY_ID,ID,PHONE_NUMBER,CREATE_TIME,OPEN_ID
+  </sql>
+  
+  <!-- 分页查询中奖信息表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+        ID,
+	    t.AWARDS_ID,
+        t.ACTIVITY_ID,
+       	t.name,
+	  	PHONE_NUMBER,
+	  	CREATE_TIME,
+	   	OPEN_ID,
+        b.activity_name as "activityName",
+        z.name as "prizeName",
+	   	z.rank as "rank"
+        from T_BIZ_LUCKY_DOGS t 
+        left join T_BIZ_AWARD_ACTIVITY b on t.activity_id = b.activity_id
+        left join T_BIZ_AWARDS_INFO z on  t.awards_id = z.awards_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询中奖信息表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_LUCKY_DOGS
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询中奖信息表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+        from T_BIZ_LUCKY_DOGS t 
+        left join T_BIZ_AWARD_ACTIVITY b on t.activity_id = b.activity_id
+        left join T_BIZ_AWARDS_INFO z on  t.awards_id = z.awards_id
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有中奖信息表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+	  select 
+        ID,
+	    t.AWARDS_ID,
+        t.ACTIVITY_ID,
+       	t.name,
+	  	PHONE_NUMBER,
+	  	CREATE_TIME,
+	   	OPEN_ID,
+        b.activity_name as "activityName",
+        z.name as "prizeName",
+	   	z.rank as "rank"
+        from T_BIZ_LUCKY_DOGS t 
+        left join T_BIZ_AWARD_ACTIVITY b on t.activity_id = b.activity_id
+        left join T_BIZ_AWARDS_INFO z on  t.awards_id = z.awards_id
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据中奖信息表编码,查询中奖信息表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_LUCKY_DOGS
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加中奖信息表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_LUCKY_DOGS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="awardsId != null"> AWARDS_ID, </if>
+	<if test="activityId != null"> ACTIVITY_ID, </if>
+	<if test="phoneNumber != null"> PHONE_NUMBER, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="openId != null"> OPEN_ID, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="awardsId != null"> #{awardsId,jdbcType=VARCHAR}, </if>
+	<if test="activityId != null"> #{activityId,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null"> #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="openId != null"> #{openId,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新中奖信息表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_LUCKY_DOGS
+     <set >
+      <if test="awardsId != null">AWARDS_ID = #{awardsId,jdbcType=VARCHAR}, </if>
+	<if test="activityId != null">ACTIVITY_ID = #{activityId,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="openId != null">OPEN_ID = #{openId,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_LUCKY_DOGS
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除中奖信息表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_LUCKY_DOGS
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

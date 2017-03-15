@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+	<classPathEntry
+		location="F:\maven-ly\repo\com\oracle\ojdbc14\10.2.0.4.0\ojdbc14-10.2.0.4.0.jar" />
+	<context id="mysqlTables" targetRuntime="MyBatis3">
+		
+		<commentGenerator>  
+		    <!-- 是否去除自动生成的注释 true：是 ： false:否 -->  
+		    <property name="suppressAllComments" value="true" />  
+	    </commentGenerator> 
+		
+		<jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver"
+			connectionURL="jdbc:oracle:thin:@222.88.71.16:1521:aoasdb" 
+			userId="weixin"
+			password="weixin" />
+
+		<!-- 不强制使用bigDecimal -->
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<!-- 实体类 -->
+		<javaModelGenerator targetPackage="mybatis.entity"
+			targetProject="wxadmincore" />
+		<!-- 接口 -->
+		<sqlMapGenerator targetPackage="mybatis.xml"
+			targetProject="wxadmincore" />
+		<!-- xml -->
+		<javaClientGenerator targetPackage="mybatis.dao"
+			targetProject="wxadmincore"
+			type="XMLMAPPER" />
+		<table schema="WEIXIN" tableName="T_S_POSITION" />
+	</context>
+</generatorConfiguration>

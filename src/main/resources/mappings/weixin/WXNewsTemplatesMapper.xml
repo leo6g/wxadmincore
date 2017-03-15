@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXNewsTemplatesMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="NEWS_TEMP_ID" property="newsTempId" jdbcType="VARCHAR"/>
+  	<result column="TYPE" property="type" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="AUTH_STATE" property="authState" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+    <if test="wkNumberIsNull != null" >
+		 AND WEEKLY_NUMBER is null
+	 </if>
+     <if test="type != null and type != ''" >
+		 AND TYPE = #{type}
+	 </if>
+	<if test="newsTempId != null and newsTempId != ''" >
+		 AND NEWS_TEMP_ID = #{newsTempId}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	<if test="deleteFlag != null" >
+		 AND DELETE_FLAG = #{deleteFlag}
+	 </if>
+	<if test="name != null and name != ''" >
+	 	AND NAME like '%'||#{name}||'%' 
+	 </if>
+	<if test="authState != null" >
+		 AND AUTH_STATE = #{authState,jdbcType=VARCHAR}
+	 </if>
+     <if test="role == 'business'" >
+		 AND AUTH_STATE in('DRAFT','1-WAITING','2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+	 <if test="role == 'infor'" >
+		 AND AUTH_STATE in('1-WAITING','2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+	 <if test="role == 'cardcheck'" >
+		 AND AUTH_STATE in('2-WAITING','1-REJECTED','2-REJECTED','COMPLETED')
+	 </if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	TYPE,NAME,AUTH_STATE,NEWS_TEMP_ID,CREATE_TIME,CREATE_USER
+  </sql>
+  
+  <!-- 分页查询微信图文详情 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	<include refid="Base_Column_List" />
+	    from T_WX_NEWS_TEMPLATES
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+   		order by CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信图文详情 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_NEWS_TEMPLATES
+    where NEWS_TEMP_ID = #{newsTempId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信图文详情总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_NEWS_TEMPLATES
+	   <if test="_parameter != null" >
+	     	<include refid="Example_Where_Clause" />
+	   </if>
+  </select>
+  
+  <!-- 查询所有微信图文详情 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_NEWS_TEMPLATES 
+  	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+    	order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信图文详情编码,查询微信图文详情信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_NEWS_TEMPLATES
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="newsTempId != null" >
+    	and NEWS_TEMP_ID != #{newsTempId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信图文详情 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_NEWS_TEMPLATES
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       NEWS_TEMP_ID,
+    <if test="type != null"> TYPE, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{newsTempId},
+     <if test="type != null"> #{type}, </if>
+	<if test="name != null"> #{name}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信图文详情 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_NEWS_TEMPLATES
+     <set >
+    <if test="type != null">TYPE = #{type}, </if>
+	<if test="name != null">NAME = #{name}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+    </set>
+    where NEWS_TEMP_ID = #{newsTempId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_NEWS_TEMPLATES
+    where NEWS_TEMP_ID = #{newsTempId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteNewsItems" parameterType="java.lang.String" >
+  	delete from T_WX_NEWS_ITEMS
+    where NEWS_TEMP_ID = #{newsTempId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信图文详情 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_NEWS_TEMPLATES
+    set DELETE_FLAG = -1
+    where NEWS_TEMP_ID = #{newsTempId,jdbcType=VARCHAR}
+  </update>
+</mapper>

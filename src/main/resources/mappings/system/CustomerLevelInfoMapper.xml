@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CustomerLevelInfoMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="LEVEL_NAME" property="levelName" jdbcType="VARCHAR"/>
+	<result column="PHONE_NUMBER" property="phoneNumber" jdbcType="VARCHAR"/>
+	<result column="CUSTOMER_LEVEL" property="customerLevel" jdbcType="VARCHAR"/>
+	<result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR"/>
+	<result column="CARD_TYPE" property="cardType" jdbcType="VARCHAR"/>
+	<result column="MANAGER_NAME" property="managerName" jdbcType="VARCHAR"/>
+	<result column="MANAGER_PHONE" property="managerPhone" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="levelName != null" >
+		 AND LEVEL_NAME = #{levelName,jdbcType=VARCHAR}
+	 </if>
+	<if test="phoneNumber != null and phoneNumber != ''" >
+		 AND PHONE_NUMBER like '%'||#{phoneNumber}||'%'
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="customerLevel != null " >
+		 AND CUSTOMER_LEVEL = #{customerLevel,jdbcType=VARCHAR}
+	 </if>
+	<if test="customerName != null and customerName != ''" >
+		 AND CUSTOMER_NAME like '%'||#{customerName}||'%'
+	 </if>
+	<if test="managerPhone != null " >
+		 AND MANAGER_PHONE = #{managerPhone,jdbcType=VARCHAR}
+	 </if>
+	<if test="managerName != null and managerName != ''" >
+		 AND MANAGER_NAME like '%'||#{managerName}||'%'
+	 </if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	LEVEL_NAME,PHONE_NUMBER,ID,CUSTOMER_LEVEL,CUSTOMER_NAME,CARD_TYPE,MANAGER_NAME,MANAGER_PHONE
+  </sql>
+  
+  <!-- 分页查询邮储个金部客户等级信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_CUSTOMER_INFO
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询邮储个金部客户等级信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_CUSTOMER_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询邮储个金部客户等级信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_CUSTOMER_INFO where 1=1
+	    <if test="phoneNumber != null and phoneNumber != ''" >
+		 AND PHONE_NUMBER like '%'||#{phoneNumber}||'%'
+	    </if>
+	    <if test="customerName != null and customerName != ''" >
+		 AND CUSTOMER_NAME like '%'||#{customerName}||'%'
+	    </if>
+	  	
+  </select>
+  
+  <!-- 查询所有邮储个金部客户等级信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_CUSTOMER_INFO 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据邮储个金部客户等级信息编码,查询邮储个金部客户等级信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_CUSTOMER_INFO
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加邮储个金部客户等级信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_CUSTOMER_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="levelName != null"> LEVEL_NAME, </if>
+	<if test="phoneNumber != null"> PHONE_NUMBER, </if>
+	<if test="customerLevel != null"> CUSTOMER_LEVEL, </if>
+	<if test="customerName != null"> CUSTOMER_NAME, </if>
+	<if test="cardType != null"> CARD_TYPE, </if>
+	<if test="managerName != null"> MANAGER_NAME, </if>
+	<if test="managerPhone != null"> MANAGER_PHONE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="levelName != null"> #{levelName,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null"> #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="customerLevel != null"> #{customerLevel,jdbcType=VARCHAR}, </if>
+	<if test="customerName != null"> #{customerName,jdbcType=VARCHAR}, </if>
+	<if test="cardType != null"> #{cardType,jdbcType=VARCHAR}, </if>
+	<if test="managerName != null"> #{managerName,jdbcType=VARCHAR}, </if>
+	<if test="managerPhone != null"> #{managerPhone,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新邮储个金部客户等级信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_CUSTOMER_INFO
+     <set >
+      <if test="levelName != null">LEVEL_NAME = #{levelName,jdbcType=VARCHAR}, </if>
+	<if test="phoneNumber != null">PHONE_NUMBER = #{phoneNumber,jdbcType=VARCHAR}, </if>
+	<if test="customerLevel != null">CUSTOMER_LEVEL = #{customerLevel,jdbcType=VARCHAR}, </if>
+	<if test="customerName != null">CUSTOMER_NAME = #{customerName,jdbcType=VARCHAR}, </if>
+	<if test="cardType != null">CARD_TYPE = #{cardType,jdbcType=VARCHAR}, </if>
+	<if test="managerName != null">MANAGER_NAME = #{managerName,jdbcType=VARCHAR}, </if>
+	<if test="managerPhone != null">MANAGER_PHONE = #{managerPhone,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_CUSTOMER_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 清空表数据 -->
+  <delete id="deleteAll">
+  	 delete from T_BIZ_CUSTOMER_INFO
+  </delete>
+  <!-- 逻辑删除邮储个金部客户等级信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_CUSTOMER_INFO
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

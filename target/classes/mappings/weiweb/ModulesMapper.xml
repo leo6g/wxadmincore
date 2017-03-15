@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ModulesMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="MODULE_ID" property="moduleId" jdbcType="VARCHAR"/>
+  	<result column="LEVELS" property="levels" jdbcType="INTEGER"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="DELETE_FLAG" property="deleteFlag" jdbcType="INTEGER"/>
+	<result column="ARTICLE_ID" property="articleId" jdbcType="VARCHAR"/>
+	<result column="LEAF" property="leaf" jdbcType="VARCHAR"/>
+	<result column="PARENT_ID" property="parentId" jdbcType="VARCHAR"/>
+	<result column="ICON_PATH" property="iconPath" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="PARENT_NAME" property="parentName" jdbcType="VARCHAR"/>
+	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="levels != null" >
+		 AND LEVELS = #{levels,jdbcType=INTEGER}
+	 </if>
+	<if test="name != null and name !=''" >
+		 AND NAME like '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="deleteFlag != null" >
+		 AND DELETE_FLAG = #{deleteFlag,jdbcType=INTEGER}
+	 </if>
+	<if test="moduleId != null" >
+		 AND MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+	 </if>
+	<if test="articleId != null" >
+		 AND ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+	 </if>
+	<if test="leaf != null" >
+		 AND LEAF = #{leaf,jdbcType=VARCHAR}
+	 </if>
+	<if test="parentId != null" >
+		 AND PARENT_ID = #{parentId,jdbcType=VARCHAR}
+	 </if>
+	<if test="iconPath != null" >
+		 AND ICON_PATH = #{iconPath,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	LEVELS,NAME,DELETE_FLAG,MODULE_ID,ARTICLE_ID,LEAF,PARENT_ID,ICON_PATH,CREATE_TIME,CREATE_USER
+  </sql>
+  
+  <!-- 分页查询微网站模块信息管理 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WW_MODULES
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 查询所有微网站模块信息管理 -->
+  <select id="getAll" resultMap="BaseResultMap">
+    select a.LEVELS,
+       a.NAME,
+       a.DELETE_FLAG,
+       a.MODULE_ID,
+       a.ARTICLE_ID,
+       a.LEAF,
+       a.PARENT_ID,
+       a.ICON_PATH,
+       a.CREATE_TIME,
+       a.CREATE_USER,
+       b.name PARENT_NAME,
+       c.title
+    from T_WW_MODULES a
+  left join T_WW_MODULES b
+    on a.parent_id = b.module_id
+  left join t_ww_article c
+    on c.article_id = a.article_id
+    <where>
+   <if test="levels != null" >
+		 AND a.LEVELS = #{levels,jdbcType=INTEGER}
+	 </if>
+	<if test="name != null and name !=''" >
+		 AND a.NAME like '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="deleteFlag != null" >
+		 AND a.DELETE_FLAG = #{deleteFlag,jdbcType=INTEGER}
+	 </if>
+	<if test="moduleId != null" >
+		 AND a.MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+	 </if>
+	<if test="articleId != null" >
+		 AND a.ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+	 </if>
+	<if test="leaf != null" >
+		 AND a.LEAF = #{leaf,jdbcType=VARCHAR}
+	 </if>
+	<if test="parentId != null" >
+		 AND a.PARENT_ID = #{parentId,jdbcType=VARCHAR}
+	 </if>
+	<if test="iconPath != null" >
+		 AND a.ICON_PATH = #{iconPath,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND a.CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND a.CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    </where>
+  </select>
+  
+  <!-- 根据Id查询微网站模块信息管理 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select a.LEVELS,
+       a.NAME,
+       a.DELETE_FLAG,
+       a.MODULE_ID,
+       a.ARTICLE_ID,
+       a.LEAF,
+       a.PARENT_ID,
+       a.ICON_PATH,
+       a.CREATE_TIME,
+       a.CREATE_USER,
+       b.name PARENT_NAME
+    from T_WW_MODULES a
+  left join T_WW_MODULES b
+    on a.parent_id = b.module_id
+    where a.MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微网站模块信息管理总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WW_MODULES
+	    <if test="_parameter != null" >
+	     	<include refid="Example_Where_Clause" />
+	   	</if>
+  </select>
+  
+   <!-- 根据菜单父ID，查询子菜单数量 -->
+  <select id="getModulesCountByParentId" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	    SELECT COUNT(1) FROM T_WW_MODULES
+	   <if test="_parameter != null" >
+	     	<include refid="Example_Where_Clause" />
+	   	</if>
+  </select>
+  
+  <!-- 根据父ID,查询子菜单信息 -->
+  <select id="getModuleListByParentId" resultMap="BaseResultMap" parameterType="java.util.Map" >
+	    SELECT 
+	    <include refid="Base_Column_List" />
+	    FROM T_WW_MODULES
+	    <if test="_parameter != null" >
+	     	<include refid="Example_Where_Clause" />
+	   	</if>
+	     order by CREATE_TIME
+  </select>
+  
+  <!-- 根据微网站模块信息管理编码,查询微网站模块信息管理信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WW_MODULES
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="moduleId != null" >
+    	and MODULE_ID != #{moduleId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微网站模块信息管理 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WW_MODULES
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MODULE_ID,
+      <if test="levels != null"> LEVELS, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="deleteFlag != null"> DELETE_FLAG, </if>
+	<if test="articleId != null"> ARTICLE_ID, </if>
+	<if test="leaf != null"> LEAF, </if>
+	<if test="parentId != null"> PARENT_ID, </if>
+	<if test="iconPath != null"> ICON_PATH, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{moduleId},
+     <if test="levels != null"> #{levels,jdbcType=INTEGER}, </if>
+	<if test="name != null"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="deleteFlag != null"> #{deleteFlag,jdbcType=INTEGER}, </if>
+	<if test="articleId != null"> #{articleId,jdbcType=VARCHAR}, </if>
+	<if test="leaf != null"> #{leaf,jdbcType=VARCHAR}, </if>
+	<if test="parentId != null"> #{parentId,jdbcType=VARCHAR}, </if>
+	<if test="iconPath != null"> #{iconPath,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null"> #{createUser,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微网站模块信息管理 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WW_MODULES
+     <set >
+      <if test="levels != null">LEVELS = #{levels,jdbcType=INTEGER}, </if>
+	<if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag,jdbcType=INTEGER}, </if>
+	<if test="articleId != null">ARTICLE_ID = #{articleId,jdbcType=VARCHAR}, </if>
+	<if test="leaf != null">LEAF = #{leaf,jdbcType=VARCHAR}, </if>
+	<if test="parentId != null">PARENT_ID = #{parentId,jdbcType=VARCHAR}, </if>
+	<if test="iconPath != null">ICON_PATH = #{iconPath,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser,jdbcType=VARCHAR}, </if>
+    </set>
+    where MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WW_MODULES
+    where MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微网站模块信息管理 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WW_MODULES
+    set DELETE_FLAG = -1
+    where MODULE_ID = #{moduleId,jdbcType=VARCHAR}
+  </update>
+</mapper>

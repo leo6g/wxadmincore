@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+ <!-- type=0关注回复语，type=1消息自动回复语 --> 
+ 
+<mapper namespace="WXSubcribeRespMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+	<result column="MSG_TYPE" property="msgType" jdbcType="VARCHAR"/>
+	<result column="TXT_MSG" property="txtMsg" jdbcType="VARCHAR"/>
+	<result column="MEDIA_ID" property="mediaId" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="TYPE" property="type" jdbcType="INTEGER"/>
+  </resultMap>
+
+   <sql id="Base_Column_List" >
+  	ID,MSG_TYPE,TXT_MSG,MEDIA_ID,CREATE_USER,CREATE_TIME,TYPE
+  </sql> 
+
+  <!-- 查询  -->
+  <select id="getAll" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+   <include refid="Base_Column_List" />
+    from T_WX_SUBCRIBE_RESP 
+    where type=#{type,jdbcType=INTEGER}
+  </select>
+  
+  <!--新增   -->
+  <insert id="insertReply" parameterType="java.util.Map" >
+    insert into T_WX_SUBCRIBE_RESP
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+    <if test="txtMsg != null"> TXT_MSG, </if>
+	<if test="msgType != null"> MSG_TYPE, </if>
+	<if test="mediaId != null"> MEDIA_ID, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="type != null"> TYPE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="txtMsg != null"> #{txtMsg}, </if>
+	<if test="msgType != null"> #{msgType}, </if>
+	<if test="mediaId != null"> #{mediaId}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="type != null"> #{type}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新-->
+    
+  <update id="updateReply" parameterType="java.util.Map" >
+    update T_WX_SUBCRIBE_RESP
+     <set >
+      <if test="txtMsg != null">TXT_MSG = #{txtMsg}, </if>
+	<if test="msgType != null">MSG_TYPE = #{msgType}, </if>
+	<if test="mediaId != null">MEDIA_ID = #{mediaId}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+<!-- 删除-->
+  <delete id="delete" parameterType="java.lang.Integer" >
+    delete from T_WX_SUBCRIBE_RESP
+    where type=#{type}
+  </delete>
+</mapper>

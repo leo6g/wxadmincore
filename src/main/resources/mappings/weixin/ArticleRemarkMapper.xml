@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ArticleRemarkMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="REMARK_ID" property="remarkId" jdbcType="VARCHAR"/>
+  	<result column="OPEN_ID" property="openId" jdbcType="VARCHAR"/>
+	<result column="ITEM_ID" property="itemId" jdbcType="VARCHAR"/>
+	<result column="AUTH_USER" property="authUser" jdbcType="VARCHAR"/>
+	<result column="AUTH_FLAG" property="authFlag" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+	<result column="AUTH_TIME" property="authTime" jdbcType="DATE"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="openId != null" >
+		 AND t.OPEN_ID = #{openId,jdbcType=VARCHAR}
+	 </if>
+	<if test="itemId != null" >
+		 AND t.ITEM_ID = #{itemId,jdbcType=VARCHAR}
+	 </if>
+	<if test="remarkId != null" >
+		 AND t.REMARK_ID = #{remarkId,jdbcType=VARCHAR}
+	 </if>
+	<if test="authUser != null" >
+		 AND t.AUTH_USER = #{authUser,jdbcType=VARCHAR}
+	 </if>
+	<if test="authFlag != null" >
+		 AND t.AUTH_FLAG = #{authFlag,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND t.CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="remark != null" >
+		 AND t.REMARK = #{remark,jdbcType=VARCHAR}
+	 </if>
+	<if test="authTime != null and authTime !=''" >
+		 AND t.AUTH_TIME = to_date('${authTime}','yyyy-mm-dd hh24:mi:ss')
+	</if>
+	<if test="nickName != null and nickName !=''" >
+		 AND u.nick_name like '%'||#{nickName}||'%'
+	</if>
+	<if test="title != null and title !=''" >
+		 AND a.title like '%'||#{title}||'%'
+	</if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	t.OPEN_ID,t.ITEM_ID,t.REMARK_ID,t.AUTH_USER,t.AUTH_FLAG,t.CREATE_TIME,t.REMARK,t.AUTH_TIME,
+  	u.nick_name as "nickName",a.title as "title"
+  </sql>
+  
+  <!-- 分页查询文章评论信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	<include refid="Base_Column_List" />
+	    from T_WX_ARTICLE_REMARK t
+	  left join t_wx_user u
+	    on t.open_id = u.open_id
+	  left join t_wx_news_items a
+	    on t.item_id = a.item_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    order by t.CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询文章评论信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+     from T_WX_ARTICLE_REMARK t
+	  left join t_wx_user u
+	    on t.open_id = u.open_id
+	  left join t_wx_news_items a
+	    on t.item_id = a.item_id
+    where t.REMARK_ID = #{remarkId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询文章评论信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_ARTICLE_REMARK t
+	  left join t_wx_user u
+	    on t.open_id = u.open_id
+	  left join t_wx_news_items a
+	    on t.item_id = a.item_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+  </select>
+  
+  <!-- 查询所有文章评论信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_ARTICLE_REMARK t
+	  left join t_wx_user u
+	    on t.open_id = u.open_id
+	  left join t_wx_news_items a
+	    on t.item_id = a.item_id
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据文章评论信息编码,查询文章评论信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_ARTICLE_REMARK
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="remarkId != null" >
+    	and REMARK_ID != #{remarkId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加文章评论信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_ARTICLE_REMARK
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       REMARK_ID,
+      <if test="openId != null"> OPEN_ID, </if>
+	<if test="itemId != null"> ITEM_ID, </if>
+	<if test="authUser != null"> AUTH_USER, </if>
+	<if test="authFlag != null"> AUTH_FLAG, </if>
+	<if test="remark != null"> REMARK, </if>
+	<if test="authTime != null"> AUTH_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{remarkId},
+     <if test="openId != null"> #{openId,jdbcType=VARCHAR}, </if>
+	<if test="itemId != null"> #{itemId,jdbcType=VARCHAR}, </if>
+	<if test="authUser != null"> #{authUser,jdbcType=VARCHAR}, </if>
+	<if test="authFlag != null"> #{authFlag,jdbcType=VARCHAR}, </if>
+	<if test="remark != null"> #{remark,jdbcType=VARCHAR}, </if>
+	<if test="authTime != null"> to_date('${authTime}','yyyy-mm-dd hh24:mi:ss'), </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新文章评论信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_ARTICLE_REMARK
+     <set >
+      <if test="openId != null">OPEN_ID = #{openId,jdbcType=VARCHAR}, </if>
+	<if test="itemId != null">ITEM_ID = #{itemId,jdbcType=VARCHAR}, </if>
+	<if test="authUser != null">AUTH_USER = #{authUser,jdbcType=VARCHAR}, </if>
+	<if test="authFlag != null">AUTH_FLAG = #{authFlag,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="remark != null">REMARK = #{remark,jdbcType=VARCHAR}, </if>
+	<if test="authTime != null">AUTH_TIME = #{authTime,jdbcType=DATE}, </if>
+    </set>
+    where REMARK_ID = #{remarkId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_ARTICLE_REMARK
+    where REMARK_ID = #{remarkId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除文章评论信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_ARTICLE_REMARK
+    set DELETE_FLAG = -1
+    where REMARK_ID = #{remarkId,jdbcType=VARCHAR}
+  </update>
+</mapper>

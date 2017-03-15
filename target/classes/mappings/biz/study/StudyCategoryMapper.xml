@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StudyCategoryMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="ICON_PATH" property="iconPath" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="BG_COLOR" property="bgColor" jdbcType="VARCHAR"/>
+	<result column="SORT" property="sort" jdbcType="INTEGER"/>
+	<result column="DELETE_FLAG" property="deleteFlag" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="iconPath != null" >
+		 AND ICON_PATH = #{iconPath,jdbcType=VARCHAR}
+	 </if>
+	<if test="name != null" >
+		 AND NAME LIKE '%'||#{name,jdbcType=VARCHAR}||'%' 
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+	<if test="bgColor != null" >
+		 AND BG_COLOR = #{bgColor,jdbcType=VARCHAR}
+	 </if>
+	<if test="sort != null" >
+		 AND SORT = #{sort,jdbcType=INTEGER}
+	 </if>
+	<if test="deleteFlag != null" >
+		 AND DELETE_FLAG = #{deleteFlag,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	ICON_PATH,NAME,ID,CREATE_TIME,CREATE_USER,BG_COLOR,SORT,DELETE_FLAG
+  </sql>
+  
+  <!-- 分页查询邮学堂板块表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_STUDY_CATEGORY
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询邮学堂板块表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_CATEGORY
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询邮学堂板块表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_STUDY_CATEGORY
+	    <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有邮学堂板块表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_CATEGORY 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据邮学堂板块表编码,查询邮学堂板块表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_CATEGORY
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加邮学堂板块表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_STUDY_CATEGORY
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="iconPath != null"> ICON_PATH, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="bgColor != null"> BG_COLOR, </if>
+	<if test="sort != null"> SORT, </if>
+	<if test="deleteFlag != null"> DELETE_FLAG, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="iconPath != null"> #{iconPath,jdbcType=VARCHAR}, </if>
+	<if test="name != null"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="bgColor != null"> #{bgColor,jdbcType=VARCHAR}, </if>
+	<if test="sort != null"> #{sort,jdbcType=INTEGER}, </if>
+	<if test="deleteFlag != null"> #{deleteFlag,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新邮学堂板块表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_STUDY_CATEGORY
+     <set >
+      <if test="iconPath != null">ICON_PATH = #{iconPath,jdbcType=VARCHAR}, </if>
+	<if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="bgColor != null">BG_COLOR = #{bgColor,jdbcType=VARCHAR}, </if>
+	<if test="sort != null">SORT = #{sort,jdbcType=INTEGER}, </if>
+	<if test="deleteFlag != null">DELETE_FLAG = #{deleteFlag,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_STUDY_CATEGORY
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除邮学堂板块表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_STUDY_CATEGORY
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

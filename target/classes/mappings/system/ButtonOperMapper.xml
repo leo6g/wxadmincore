@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ButtonOperMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+    <id column="ID" property="id" jdbcType="VARCHAR" />
+    <result column="BUT_NAME" property="butName" jdbcType="VARCHAR" />
+    <result column="BUT_CODE" property="butCode" jdbcType="VARCHAR" />
+    <result column="BUT_ICON" property="butIcon" jdbcType="VARCHAR" />
+    <result column="URL" property="url" jdbcType="VARCHAR" />
+    <result column="MENU_ID" property="menuId" jdbcType="VARCHAR" />
+    <result column="CREATE_TIME" property="createTime" jdbcType="DATE" />
+    <result column="UPDATE_TIME" property="updateTime" jdbcType="DATE" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    ID, BUT_NAME, BUT_CODE, BUT_ICON, URL, MENU_ID, to_char(CREATE_TIME,'yyyy-mm-dd') as CREATE_TIME, to_char(UPDATE_TIME,'yyyy-mm-dd') as UPDATE_TIME
+  </sql>
+  <!-- 根据主键查询按钮信息 -->
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.util.Map" >
+      select 
+     ch.ID as "id", 
+     ch.BUT_NAME as "butName", 
+     ch.BUT_CODE as "butCode",
+     ch.BUT_ICON as "butIcon",
+     ch.URL as "url",
+     ch.MENU_ID as "menuId", 
+     to_char(ch.CREATE_TIME,'yyyy-mm-dd') as "createTime",
+     to_char(ch.UPDATE_TIME,'yyyy-mm-dd') as "updateTime",
+     pa.menu_name as "parentName"
+    from T_S_BUTTON_OPER ch
+    left join T_S_MENU pa on ch.MENU_ID=pa.id 
+    where ch.ID = #{id,jdbcType=VARCHAR}
+  </select>
+   <!-- 查询按钮列表信息 -->
+    <select id="selectButtonInfoList" resultMap="BaseResultMap" parameterType="java.util.Map">
+    select 
+    <include refid="Base_Column_List" />
+    from T_S_BUTTON_OPER 
+    where MENU_id = #{menuId,jdbcType=VARCHAR}
+  </select>
+   <!-- 根据主键删除按钮信息 -->
+  <delete id="deletetButtonInfoById" parameterType="java.lang.String" >
+    delete from T_S_BUTTON_OPER 
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+     <!-- 根据菜单ID删除按钮信息 -->
+  <delete id="deletetButtonInfoByMenuId" parameterType="java.util.Map" >
+    delete from T_S_BUTTON_OPER 
+    where MENU_ID = #{menuId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 插入按钮信息 -->
+  <insert id="insertButtonInfo" parameterType="java.util.Map" >
+    insert into T_S_BUTTON_OPER
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null and id != ''" >
+        ID,
+      </if>
+      <if test="butName != null and butName != ''" >
+        BUT_NAME,
+      </if>
+      <if test="butCode != null and butCode != ''" >
+        BUT_CODE,
+      </if>
+      <if test="butIcon != null and butIcon != ''" >
+        BUT_ICON,
+      </if>
+      <if test="url != null and url != ''" >
+        URL,
+      </if>
+      <if test="menuId != null and menuId != ''" >
+        MENU_ID,
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null and id != ''" >
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="butName != null and butName != ''" >
+        #{butName,jdbcType=VARCHAR},
+      </if>
+      <if test="butCode != null and butCode != ''" >
+        #{butCode,jdbcType=VARCHAR},
+      </if>
+      <if test="butIcon != null and butIcon != ''" >
+        #{butIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null and url != ''" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="menuId != null and menuId != ''" >
+        #{menuId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        #{updateTime,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  <!-- 更新按钮信息 -->
+  <update id="updateButtonInfoById" parameterType="java.util.Map" >
+    update T_S_BUTTON_OPER
+    <set >
+      <if test="butName != null and butName != ''" >
+        BUT_NAME = #{butName,jdbcType=VARCHAR},
+      </if>
+      <if test="butCode != null and butCode != ''" >
+        BUT_CODE = #{butCode,jdbcType=VARCHAR},
+      </if>
+        BUT_ICON = #{butIcon,jdbcType=VARCHAR},
+      <if test="url != null and url != ''" >
+        URL = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="menuId != null and menuId != ''" >
+        MENU_ID = #{menuId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        CREATE_TIME = #{createTime,jdbcType=DATE},
+      </if>
+      <if test="updateTime != null and updateTime != ''" >
+        UPDATE_TIME = #{updateTime,jdbcType=DATE},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+    <!-- 根据角色ID查询该角色是否关联该按钮 -->
+   <select id="queryPrivInfoByRoleId" parameterType="java.util.Map" resultType="java.lang.Integer">
+	  select 
+      count(0) 
+      from T_S_ROLE_PRIV where type=2  
+      AND PRIV_ID =#{buttonId,jdbcType=VARCHAR}  
+      AND ROLE_ID =#{roleId,jdbcType=VARCHAR}  
+   </select>
+   
+         <!-- 根据菜单ID，userID，查询按钮数量 -->
+  <select id="selectBtnCountByUser" resultType="java.lang.Integer"  parameterType="java.util.Map" >
+	select count(1) 
+    from t_s_button_oper b 
+    left join t_s_role_priv p on p.priv_id=b.id 
+    left join t_s_user_role r on r.role_id=p.role_id 
+    where p.type=2 
+    and r.user_id = #{userId,jdbcType=VARCHAR}  
+    and b.menu_id = #{menuId,jdbcType=VARCHAR}
+  </select>
+    
+    <!-- 根据菜单ID，用户ID,查询按钮信息 -->
+  <select id="selectBtnInfoByUser" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select distinct b.id as "id",
+    b.but_name as "butName",
+    b.but_code as "butCode",
+    b.but_icon as "butIcon",
+    b.url as "butUrl"
+    from t_s_button_oper b 
+    left join t_s_role_priv p on p.priv_id=b.id 
+    left join t_s_user_role r on r.role_id=p.role_id 
+    where p.type=2 
+    and r.user_id = #{userId,jdbcType=VARCHAR}  
+    and b.menu_id = #{menuId,jdbcType=VARCHAR}
+  </select>
+</mapper>

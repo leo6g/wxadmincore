@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="PaymentInfoMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+  	<result column="CODE" property="code" jdbcType="VARCHAR"/>
+	<result column="NAME" property="name" jdbcType="VARCHAR"/>
+	<result column="LINK_URL" property="linkUrl" jdbcType="VARCHAR"/>
+	<result column="IMG_PATH" property="imgPath" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="code != null" >
+		 AND CODE = #{code,jdbcType=VARCHAR}
+	 </if>
+	<if test="name != null" >
+		 AND NAME LIKE '%'||#{name,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="id != null" >
+		 AND ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="linkUrl != null" >
+		 AND LINK_URL = #{linkUrl,jdbcType=VARCHAR}
+	 </if>
+	<if test="imgPath != null" >
+		 AND IMG_PATH = #{imgPath,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	CODE,NAME,ID,LINK_URL,IMG_PATH
+  </sql>
+  
+  <!-- 分页查询缴费数据信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_BIZ_PAYMENT_INFO
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询缴费数据信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PAYMENT_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询缴费数据信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_BIZ_PAYMENT_INFO
+	    <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有缴费数据信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_PAYMENT_INFO 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据缴费数据信息编码,查询缴费数据信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_PAYMENT_INFO
+    where CODE = #{code,jdbcType=VARCHAR}
+    AND DELETE_FLAG = 0 
+    <if test="id != null" >
+    	and ID != #{id,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加缴费数据信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_PAYMENT_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ID,
+      <if test="code != null"> CODE, </if>
+	<if test="name != null"> NAME, </if>
+	<if test="linkUrl != null"> LINK_URL, </if>
+	<if test="imgPath != null"> IMG_PATH, </if>
+	<if test="seriesNo != null"> SERIES_NO, </if>
+	<if test="payTime != null"> PAY_TIME, </if>
+	<if test="payMoney != null"> PAY_MONEY, </if>
+	<if test="openId != null"> OPEN_ID, </if>
+	
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{id},
+     <if test="code != null"> #{code,jdbcType=VARCHAR}, </if>
+	<if test="name != null"> #{name,jdbcType=VARCHAR}, </if>
+	<if test="linkUrl != null"> #{linkUrl,jdbcType=VARCHAR}, </if>
+	<if test="imgPath != null"> #{imgPath,jdbcType=VARCHAR}, </if>
+	<if test="seriesNo != null"> #{seriesNo,jdbcType=VARCHAR}, </if>
+	<if test="payTime != null"> #{payTime}, </if>
+	<if test="payMoney != null"> #{payMoney,jdbcType=VARCHAR}, </if>
+	<if test="openId != null"> #{openId,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新缴费数据信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_PAYMENT_INFO
+     <set >
+      <if test="code != null">CODE = #{code,jdbcType=VARCHAR}, </if>
+	<if test="name != null">NAME = #{name,jdbcType=VARCHAR}, </if>
+	<if test="linkUrl != null">LINK_URL = #{linkUrl,jdbcType=VARCHAR}, </if>
+	<if test="imgPath != null">IMG_PATH = #{imgPath,jdbcType=VARCHAR}, </if>
+    </set>
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_PAYMENT_INFO
+    where ID = #{id,jdbcType=VARCHAR}
+  </delete>
+  
+  <delete id="deleteAll">
+    delete from T_BIZ_PAYMENT_INFO
+  </delete>
+  <!-- 逻辑删除缴费数据信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_PAYMENT_INFO
+    set DELETE_FLAG = -1
+    where ID = #{id,jdbcType=VARCHAR}
+  </update>
+</mapper>

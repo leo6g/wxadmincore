@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="StudyArticleMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ARTICLE_ID" property="articleId" jdbcType="VARCHAR"/>
+  	<result column="CATEGORY_ID" property="categoryId" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="CONTENT" property="content" jdbcType="CLOB" javaType="java.lang.String" typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	<result column="IMG_PATH" property="imgPath" jdbcType="VARCHAR"/>
+	<result column="SORT_NUM" property="sortNum" jdbcType="INTEGER"/>
+	<result column="SUB_CATEGORY" property="subCategory" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="categoryId != null and categoryId != ''" >
+		 AND t.CATEGORY_ID = #{categoryId,jdbcType=VARCHAR}
+	 </if>
+	<if test="id != null" >
+		 AND t.ID = #{id,jdbcType=VARCHAR}
+	 </if>
+	<if test="articleId != null" >
+		 AND t.ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND t.CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND t.CREATE_USER = #{createUser,jdbcType=VARCHAR}
+	 </if>
+	<if test="content != null" >
+		 AND t.CONTENT = #{content,jdbcType=CLOB}
+	 </if>
+	<if test="title != null and title !=''" >
+		 AND t.TITLE  LIKE '%'||#{title,jdbcType=VARCHAR}||'%'
+	 </if>
+	 <if test="sortNum != null" >
+		 AND t.SORT_NUM = #{sortNum,jdbcType=INTEGER}
+	 </if>
+	<if test="subCategory != null and subCategory !=''" >
+		 AND t.SUB_CATEGORY = #{subCategory,jdbcType=VARCHAR}
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	t.CATEGORY_ID,t.ID,t.ARTICLE_ID,t.CREATE_TIME,t.CREATE_USER,t.CONTENT,t.TITLE,t.IMG_PATH,t.SORT_NUM,t.SUB_CATEGORY
+  </sql>
+  
+  <!-- 分页查询邮学堂文章表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <!-- <include refid="Base_Column_List" /> -->
+	  		 t.CATEGORY_ID,
+             t.ID,
+             t.ARTICLE_ID,
+             t.CREATE_TIME,
+             t.CREATE_USER,
+             t.TITLE,
+             t.IMG_PATH,
+             t.SORT_NUM,
+             t.SUB_CATEGORY,
+             c.name as "categoryName"
+      from T_BIZ_STUDY_ARTICLE t 
+      left join t_biz_study_category c 
+      on t.category_id = c.id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    <if test="orderByClause != null" >
+     	order by ${orderByClause}
+    </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询邮学堂文章表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_ARTICLE t
+    where ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询邮学堂文章表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+      from T_BIZ_STUDY_ARTICLE t 
+      left join t_biz_study_category c 
+      on t.category_id = c.id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+  </select>
+  
+  <!-- 查询所有邮学堂文章表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_ARTICLE t
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据邮学堂文章表编码,查询邮学堂文章表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_BIZ_STUDY_ARTICLE
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="articleId != null" >
+    	and ARTICLE_ID != #{articleId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加邮学堂文章表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_BIZ_STUDY_ARTICLE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ARTICLE_ID,
+      <if test="categoryId != null"> CATEGORY_ID, </if>
+	<if test="id != null"> ID, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="content != null"> CONTENT, </if>
+	<if test="title != null"> TITLE, </if>
+	<if test="imgPath != null"> IMG_PATH, </if>
+	<if test="sortNum != null"> SORT_NUM, </if>
+	<if test="subCategory != null"> SUB_CATEGORY, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{articleId},
+     <if test="categoryId != null"> #{categoryId,jdbcType=VARCHAR}, </if>
+	<if test="id != null"> #{id,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> #{createTime,jdbcType=DATE}, </if>
+	<if test="createUser != null"> #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="content != null"> #{content,jdbcType=CLOB}, </if>
+	<if test="title != null"> #{title,jdbcType=VARCHAR}, </if>
+	<if test="imgPath != null"> #{imgPath,jdbcType=VARCHAR}, </if>
+	<if test="sortNum != null"> #{sortNum,jdbcType=INTEGER}, </if>
+	<if test="subCategory != null"> #{subCategory,jdbcType=VARCHAR}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新邮学堂文章表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_BIZ_STUDY_ARTICLE
+    <set >
+    <if test="categoryId != null">CATEGORY_ID = #{categoryId,jdbcType=VARCHAR}, </if>
+	<if test="id != null">ID = #{id,jdbcType=VARCHAR}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser,jdbcType=VARCHAR}, </if>
+	<if test="content != null">CONTENT = #{content,jdbcType=CLOB}, </if>
+	<if test="title != null">TITLE = #{title,jdbcType=VARCHAR}, </if>
+	<if test="imgPath != null and imgPath != ''">IMG_PATH = #{imgPath,jdbcType=VARCHAR}, </if>
+	<if test="sortNum != null">SORT_NUM = #{sortNum,jdbcType=INTEGER}, </if>
+	<if test="subCategory != null">SUB_CATEGORY = #{subCategory,jdbcType=VARCHAR}, </if>
+    </set>
+    where ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_BIZ_STUDY_ARTICLE
+    where ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除邮学堂文章表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_BIZ_STUDY_ARTICLE
+    set DELETE_FLAG = -1
+    where ARTICLE_ID = #{articleId,jdbcType=VARCHAR}
+  </update>
+</mapper>

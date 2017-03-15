@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXKeywordsRespMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="KEYWORDS_ID" property="keywordsId" jdbcType="VARCHAR"/>
+	<result column="RULE_NAME" property="ruleName" jdbcType="VARCHAR"/>
+	<result column="WORDS" property="words" jdbcType="VARCHAR"/>
+	<result column="RESPONSE_TYPE" property="responseType" jdbcType="VARCHAR"/>
+	<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+	<result column="RESP_TXT_MSG" property="respTxtMsg" jdbcType="VARCHAR"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="creatTime" jdbcType="DATE"/>
+  </resultMap>
+  
+  
+   <sql id="Base_Column_List" >
+  	RULE_NAME,WORDS,RESPONSE_TYPE,MATERIAL_ID,RESP_TXT_MSG,CREATE_USER,CREATE_TIME
+  </sql> 
+  
+  <!-- 分页查询微信关键词回复规则 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_KEYWORDS_RESP
+	    order by ${creatTime}
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_KEYWORDS_RESP
+    where KEYWORDS_ID = #{keywordsId,jdbcType=VARCHAR}
+  </select>
+ 
+  
+  <!-- 查询微信关键字自动回复规则总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_KEYWORDS_RESP
+	    <!-- <if test="_parameter != null" >
+     	 <include refid="Example_Where_Clause" /> 
+   		</if>-->
+	    order by ${creatTime}
+  </select>
+  
+  <!-- 查询所有关键字自动回复规则 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+    <!--  <if test="distinct" >
+      distinct
+    </if> -->
+   <include refid="Base_Column_List" />
+    from T_WX_KEYWORDS_RESP 
+   <!-- <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if> -->
+  </select>
+  
+  <!-- 增加关键词自动回复规则 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_KEYWORDS_RESP
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       KEYWORDS_ID,
+    <if test="ruleName != null"> RULE_NAME, </if>
+	<if test="words != null"> WORDS, </if>
+	<if test="responseType != null"> RESPONSE_TYPE, </if>
+		<if test="materialId != null"> MATERIAL_ID, </if>
+		<if test="respTxtMsg != null"> RESP_TXT_MSG, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{keywordsId},
+     <if test="ruleName != null"> #{ruleName}, </if>
+	<if test="words != null"> #{words}, </if>
+	<if test="responseType != null"> #{responseType}, </if>
+	<if test="materialId != null"> #{materialId}, </if>
+	<if test="respTxtMsg != null"> #{respTxtMsg}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信关注语 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_KEYWORDS_RESP
+     <set >
+      <if test="ruleName != null">RULE_NAME = #{ruleName}, </if>
+	<if test="words != null">WORDS = #{words}, </if>
+	<if test="responseType != null">RESPONSE_TYPE = #{responseType}, </if>
+	<if test="materialId != null">MATERIAL_ID = #{materialId}, </if>
+	<if test="respTxtMsg != null">RESP_TXT_MSG = #{respTxtMsg}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+    </set>
+    where KEYWORDS_ID = #{keywordsId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_KEYWORDS_RESP
+    where KEYWORDS_ID = #{keywordsId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信关注语 -->
+  
+<!--   <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_KEYWORDS_RESP
+    set DELETE_FLAG = -1
+    where KEYWORDS_ID = #{keywordsId,jdbcType=VARCHAR}
+  </update> -->
+</mapper>

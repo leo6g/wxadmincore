@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXNewsItemsMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ITEM_ID" property="itemId" jdbcType="VARCHAR"/>
+  	<result column="CONTENT" property="content" jdbcType="CLOB" javaType="java.lang.String" typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+	<result column="TYPE" property="type" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="URL" property="url" jdbcType="VARCHAR"/>
+	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	<result column="SORT" property="sort" jdbcType="INTEGER"/>
+	<result column="IMAGE_PATH" property="imagePath" jdbcType="VARCHAR"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="NEWS_TEMP_ID" property="newsTempId" jdbcType="VARCHAR"/>
+	<result column="AUTHOR" property="author" jdbcType="VARCHAR"/>
+	<result column="VIEW_TIMES" property="viewTimes" jdbcType="INTEGER"/>
+	<result column="PRAISE_TIMES" property="praiseTimes" jdbcType="INTEGER"/>
+	
+	<result column="SHOW_ADVER" property="showAdver" jdbcType="VARCHAR"/>
+	<result column="SHOW_PRAISE" property="showPraise" jdbcType="VARCHAR"/>
+	<result column="SHOW_REMARK" property="showRemark" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="content != null" >
+		 AND CONTENT = #{content}
+	 </if>
+	<if test="type != null" >
+		 AND TYPE = #{type}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="itemId != null" >
+		 AND ITEM_ID = #{itemId}
+	 </if>
+	<if test="url != null" >
+		 AND URL = #{url}
+	 </if>
+	<if test="title != null" >
+		 AND TITLE = #{title}
+	 </if>
+	<if test="sort != null" >
+		 AND SORT = #{sort}
+	 </if>
+	<if test="imagePath != null" >
+		 AND IMAGE_PATH = #{imagePath}
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	<if test="newsTempId != null" >
+		 AND NEWS_TEMP_ID = #{newsTempId}
+	 </if>
+	<if test="author != null" >
+		 AND AUTHOR = #{author}
+	 </if>
+	<if test="viewTimes != null" >
+		 AND VIEW_TIMES = #{viewTimes}
+	 </if>
+	<if test="praiseTimes != null" >
+		 AND PRAISE_TIMES = #{praiseTimes}
+	 </if>
+	<if test="showRemark != null" >
+		 AND SHOW_REMARK = #{showRemark}
+	 </if>
+	      
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	CONTENT,TYPE,CREATE_TIME,ITEM_ID,URL,TITLE,SORT,IMAGE_PATH,CREATE_USER,NEWS_TEMP_ID,AUTHOR,
+  	VIEW_TIMES,PRAISE_TIMES,SHOW_ADVER,SHOW_PRAISE,SHOW_REMARK
+  </sql>
+  
+  <!-- 分页查询微信图文详情 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_NEWS_ITEMS
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+     	order by SORT
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信图文详情 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_NEWS_ITEMS
+    where ITEM_ID = #{itemId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信图文详情总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_NEWS_ITEMS
+	    <if test="_parameter != null" >
+     		<include refid="Example_Where_Clause" />
+   		</if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信图文详情 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+    TYPE,CREATE_TIME,ITEM_ID,URL,TITLE,SORT,IMAGE_PATH,CREATE_USER,NEWS_TEMP_ID,AUTHOR,VIEW_TIMES,
+    PRAISE_TIMES,SHOW_ADVER,SHOW_PRAISE,SHOW_REMARK
+    from T_WX_NEWS_ITEMS 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+   order by SORT
+  </select>
+  <!-- 根据微信图文详情编码,查询微信图文详情信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_NEWS_ITEMS
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="itemId != null" >
+    	and ITEM_ID != #{itemId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信图文详情 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_NEWS_ITEMS
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       ITEM_ID,
+      <if test="content != null"> CONTENT, </if>
+	<if test="type != null"> TYPE, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="url != null"> URL, </if>
+	<if test="title != null"> TITLE, </if>
+	<if test="sort != null"> SORT, </if>
+	<if test="imagePath != null"> IMAGE_PATH, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	<if test="newsTempId != null"> NEWS_TEMP_ID, </if>
+	<if test="author != null"> AUTHOR, </if>
+	<if test="viewTimes != null"> VIEW_TIMES, </if>
+	<if test="praiseTimes != null"> PRAISE_TIMES, </if>
+	<if test="showAdver != null"> SHOW_ADVER, </if>
+	<if test="showPraise != null"> SHOW_PRAISE, </if>
+	<if test="showRemark != null"> SHOW_REMARK, </if>
+	
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{itemId},
+     <if test="content != null"> #{content,typeHandler=org.apache.ibatis.type.ClobTypeHandler}, </if>
+	<if test="type != null"> #{type}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="url != null"> #{url}, </if>
+	<if test="title != null"> #{title}, </if>
+	<if test="sort != null"> #{sort}, </if>
+	<if test="imagePath != null"> #{imagePath}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	<if test="newsTempId != null"> #{newsTempId}, </if>
+	<if test="author != null"> #{author}, </if>
+	<if test="viewTimes != null"> #{viewTimes}, </if>
+	<if test="praiseTimes != null"> #{praiseTimes}, </if>
+	<if test="showAdver != null"> #{showAdver},</if>
+	<if test="showPraise != null">#{showPraise},</if>
+	<if test="showRemark != null">#{showRemark},</if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信图文详情 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_NEWS_ITEMS
+     <set >
+    <if test="content != null">CONTENT = #{content,typeHandler=org.apache.ibatis.type.ClobTypeHandler}, </if>
+	<if test="type != null">TYPE = #{type}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="url != null">URL = #{url}, </if>
+	<if test="title != null">TITLE = #{title}, </if>
+	<if test="sort != null">SORT = #{sort}, </if>
+	<if test="imagePath != null">IMAGE_PATH = #{imagePath}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+	<if test="author != null">AUTHOR = #{author}, </if>
+	<if test="viewTimes != null">VIEW_TIMES = #{viewTimes}, </if>
+	<if test="praiseTimes != null">PRAISE_TIMES = #{praiseTimes}, </if>
+	<if test="showAdver != null"> SHOW_ADVER = #{showAdver}, </if>
+	<if test="showPraise != null"> SHOW_PRAISE = #{showPraise},</if>
+	<if test="showRemark != null"> SHOW_REMARK = #{showRemark},</if>
+    </set>
+    where ITEM_ID = #{itemId,jdbcType=VARCHAR}
+  </update>
+  
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_NEWS_ITEMS
+    where ITEM_ID = #{itemId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信图文详情 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_NEWS_ITEMS
+    set DELETE_FLAG = -1
+    where ITEM_ID = #{itemId,jdbcType=VARCHAR}
+  </update>
+</mapper>

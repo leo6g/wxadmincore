@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="NetPointMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="NEW_ORG_ID" property="newOrgId" jdbcType="VARCHAR"/>
+  	<result column="LATITUDE" property="latitude" jdbcType="INTEGER"/>
+	<result column="ORG_ABLIB" property="orgAblib" jdbcType="VARCHAR"/>
+	<result column="LONGITUDE" property="longitude" jdbcType="INTEGER"/>
+	<result column="AGENCY_SORT" property="agencySort" jdbcType="INTEGER"/>
+	<result column="ORG_ABLIA" property="orgAblia" jdbcType="VARCHAR"/>
+	<result column="CITY" property="city" jdbcType="VARCHAR"/>
+	<result column="TOWN" property="town" jdbcType="VARCHAR"/>
+	<result column="RGLM_CODE" property="rglmCode" jdbcType="VARCHAR"/>
+	<result column="AREA_ATTR" property="areaAttr" jdbcType="VARCHAR"/>
+	<result column="ORG_SHT_NAME" property="orgShtName" jdbcType="VARCHAR"/>
+	<result column="IMAGE_PATH" property="imagePath" jdbcType="VARCHAR"/>
+	<result column="ORG_NAME" property="orgName" jdbcType="VARCHAR"/>
+	<result column="ORG_FLAG" property="orgFlag" jdbcType="VARCHAR"/>
+	<result column="ORG_ABLI" property="orgAbli" jdbcType="VARCHAR"/>
+	<result column="ORG_LVL" property="orgLvl" jdbcType="VARCHAR"/>
+	<result column="OLD_ORG_ID" property="oldOrgId" jdbcType="VARCHAR"/>
+	<result column="PAGENCY_ID" property="pagencyId" jdbcType="VARCHAR"/>
+	<result column="ORG_STAT" property="orgStat" jdbcType="VARCHAR"/>
+	<result column="ORG_ATTR" property="orgAttr" jdbcType="VARCHAR"/>
+	<result column="ADDR" property="addr" jdbcType="VARCHAR"/>
+	<result column="BIZ_TYPES" property="bizTypes" jdbcType="VARCHAR"/>
+	<result column="PHONE" property="phone" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="latitude != null" >
+		 AND LATITUDE = #{latitude}
+	 </if>
+	<if test="orgAblib != null" >
+		 AND ORG_ABLIB = #{orgAblib}
+	 </if>
+	<if test="longitude != null" >
+		 AND LONGITUDE = #{longitude}
+	 </if>
+	<if test="agencySort != null" >
+		 AND AGENCY_SORT = #{agencySort}
+	 </if>
+	<if test="orgAblia != null" >
+		 AND ORG_ABLIA = #{orgAblia}
+	 </if>
+	<if test="city != null and city != ''" >
+		 AND CITY = #{city}
+	 </if>
+	<if test="town != null and town != ''" >
+		 AND TOWN = #{town} 
+	 </if>
+	<if test="rglmCode != null" >
+		 AND RGLM_CODE = #{rglmCode}
+	 </if>
+	<if test="areaAttr != null" >
+		 AND AREA_ATTR = #{areaAttr}
+	 </if>
+	<if test="orgShtName != null and orgShtName != ''" >
+		 AND ORG_SHT_NAME like '%'||#{orgShtName}||'%'
+	 </if>
+	<if test="imagePath != null" >
+		 AND IMAGE_PATH = #{imagePath}
+	 </if>
+	<if test="orgName != null" >
+		 AND ORG_NAME = #{orgName}
+	 </if>
+	<if test="newOrgId != null" >
+		 AND NEW_ORG_ID = #{newOrgId}
+	 </if>
+	<if test="orgFlag != null" >
+		 AND ORG_FLAG = #{orgFlag}
+	 </if>
+	<if test="orgAbli != null" >
+		 AND ORG_ABLI = #{orgAbli}
+	 </if>
+	<if test="orgLvl != null" >
+		 AND ORG_LVL = #{orgLvl}
+	 </if>
+	<if test="oldOrgId != null" >
+		 AND OLD_ORG_ID = #{oldOrgId}
+	 </if>
+	<if test="pagencyId != null" >
+		 AND PAGENCY_ID = #{pagencyId}
+	 </if>
+	<if test="orgStat != null" >
+		 AND ORG_STAT = #{orgStat}
+	 </if>
+	<if test="addr != null" >
+		 AND ADDR = #{addr}
+	 </if>
+	 <if test="bizTypes != null" >
+		 AND BIZ_TYPES = #{bizTypes}
+	 </if>
+	 <if test="phone != null" >
+		 AND PHONE = #{phone}
+	 </if>
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	LATITUDE,ORG_ABLIB,LONGITUDE,AGENCY_SORT,ORG_ABLIA,CITY,TOWN,RGLM_CODE,AREA_ATTR,ORG_SHT_NAME,IMAGE_PATH,ORG_NAME,NEW_ORG_ID,ORG_FLAG,ORG_ABLI,ORG_LVL,OLD_ORG_ID,PAGENCY_ID,ORG_STAT,ORG_ATTR,
+  	ADDR,BIZ_TYPES,PHONE
+  </sql>
+  
+  <!-- 分页查询网点信息 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from B_PSBC_ALL_ORG_INFO
+	    
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+	<if test="orderByClause != null" >
+     order by ${orderByClause}
+ 	</if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询网点信息 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from B_PSBC_ALL_ORG_INFO
+    where NEW_ORG_ID = #{newOrgId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询网点信息总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from B_PSBC_ALL_ORG_INFO
+	   
+	    <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   		</if>
+		 <if test="orderByClause != null" >
+		order by ${orderByClause}
+		</if>  
+	
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有网点信息 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from B_PSBC_ALL_ORG_INFO 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据网点信息编码,查询网点信息信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from B_PSBC_ALL_ORG_INFO
+    where RGLM_CODE = #{rglmCode,jdbcType=VARCHAR}
+    AND DELETE_FLAG = 0 
+    <if test="newOrgId != null" >
+    	and NEW_ORG_ID != #{newOrgId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加网点信息 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into B_PSBC_ALL_ORG_INFO
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       NEW_ORG_ID,
+      <if test="latitude != null"> LATITUDE, </if>
+	<if test="orgAblib != null"> ORG_ABLIB, </if>
+	<if test="longitude != null"> LONGITUDE, </if>
+	<if test="agencySort != null"> AGENCY_SORT, </if>
+	<if test="orgAblia != null"> ORG_ABLIA, </if>
+	<if test="city != null"> CITY, </if>
+	<if test="town != null"> TOWN, </if>
+	<if test="rglmCode != null"> RGLM_CODE, </if>
+	<if test="areaAttr != null"> AREA_ATTR, </if>
+	<if test="orgShtName != null"> ORG_SHT_NAME, </if>
+	<if test="imagePath != null"> IMAGE_PATH, </if>
+	<if test="orgName != null"> ORG_NAME, </if>
+	<if test="orgFlag != null"> ORG_FLAG, </if>
+	<if test="orgAbli != null"> ORG_ABLI, </if>
+	<if test="orgLvl != null"> ORG_LVL, </if>
+	<if test="oldOrgId != null"> OLD_ORG_ID, </if>
+	<if test="pagencyId != null"> PAGENCY_ID, </if>
+	<if test="orgStat != null"> ORG_STAT, </if>
+	<if test="orgAttr != null"> ORG_ATTR, </if>
+	<if test="phone != null"> PHONE, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{newOrgId},
+     <if test="latitude != null"> #{latitude}, </if>
+	<if test="orgAblib != null"> #{orgAblib}, </if>
+	<if test="longitude != null"> #{longitude}, </if>
+	<if test="agencySort != null"> #{agencySort}, </if>
+	<if test="orgAblia != null"> #{orgAblia}, </if>
+	<if test="city != null"> #{city}, </if>
+	<if test="town != null"> #{town}, </if>
+	<if test="rglmCode != null"> #{rglmCode}, </if>
+	<if test="areaAttr != null"> #{areaAttr}, </if>
+	<if test="orgShtName != null"> #{orgShtName}, </if>
+	<if test="imagePath != null"> #{imagePath}, </if>
+	<if test="orgName != null"> #{orgName}, </if>
+	<if test="orgFlag != null"> #{orgFlag}, </if>
+	<if test="orgAbli != null"> #{orgAbli}, </if>
+	<if test="orgLvl != null"> #{orgLvl}, </if>
+	<if test="oldOrgId != null"> #{oldOrgId}, </if>
+	<if test="pagencyId != null"> #{pagencyId}, </if>
+	<if test="orgStat != null"> #{orgStat}, </if>
+	<if test="orgAttr != null"> #{orgAttr}, </if>
+	<if test="phone != null"> #{phone}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新网点信息 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update B_PSBC_ALL_ORG_INFO
+     <set >
+      <if test="latitude != null">LATITUDE = #{latitude}, </if>
+	<if test="orgAblib != null">ORG_ABLIB = #{orgAblib}, </if>
+	<if test="longitude != null">LONGITUDE = #{longitude}, </if>
+	<if test="agencySort != null">AGENCY_SORT = #{agencySort}, </if>
+	<if test="orgAblia != null">ORG_ABLIA = #{orgAblia}, </if>
+	<if test="city != null">CITY = #{city}, </if>
+	<if test="town != null">TOWN = #{town}, </if>
+	<if test="rglmCode != null">RGLM_CODE = #{rglmCode}, </if>
+	<if test="areaAttr != null">AREA_ATTR = #{areaAttr}, </if>
+	<if test="orgShtName != null">ORG_SHT_NAME = #{orgShtName}, </if>
+	<if test="imagePath != null">IMAGE_PATH = #{imagePath}, </if>
+	<if test="orgName != null">ORG_NAME = #{orgName}, </if>
+	<if test="orgFlag != null">ORG_FLAG = #{orgFlag}, </if>
+	<if test="orgAbli != null">ORG_ABLI = #{orgAbli}, </if>
+	<if test="orgLvl != null">ORG_LVL = #{orgLvl}, </if>
+	<if test="oldOrgId != null">OLD_ORG_ID = #{oldOrgId}, </if>
+	<if test="pagencyId != null">PAGENCY_ID = #{pagencyId}, </if>
+	<if test="orgStat != null">ORG_STAT = #{orgStat}, </if>
+	<if test="orgAttr != null">ORG_ATTR = #{orgAttr}, </if>
+	<if test="addr != null">ADDR = #{addr}, </if>
+	<if test="bizTypes != null">BIZ_TYPES = #{bizTypes}, </if>
+	<if test="phone != null">PHONE = #{phone}, </if>
+    </set>
+    where NEW_ORG_ID = #{newOrgId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from B_PSBC_ALL_ORG_INFO
+    where NEW_ORG_ID = #{newOrgId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除网点信息 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update B_PSBC_ALL_ORG_INFO
+    set DELETE_FLAG = -1
+    where NEW_ORG_ID = #{newOrgId,jdbcType=VARCHAR}
+  </update>
+</mapper>

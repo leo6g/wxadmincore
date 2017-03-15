@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXKeywordResponseMapper" >
+	<resultMap id="BaseResultMap" type="java.util.Map">
+		<id column="KEYWORD_ID" property="keywordId" jdbcType="VARCHAR" />
+		<result column="RULE_ID" property="ruleId" jdbcType="VARCHAR" />
+		<result column="RULE_NAME" property="ruleName" jdbcType="VARCHAR" />
+		<result column="RESPONSE_TYPE" property="responseType"
+			jdbcType="VARCHAR" />
+		<result column="TXT_CONTENT" property="txtContent" jdbcType="VARCHAR" />
+		<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR" />
+		<result column="KEYWORD" property="keyWord" jdbcType="VARCHAR" />
+		<result column="IS_ALLMATCH" property="isAllmatch" jdbcType="INTEGER" />
+	</resultMap>
+	
+    <resultMap id="BaseResultMapRule" type="java.util.Map" >
+	<id column="RULE_ID" property="ruleId" jdbcType="VARCHAR"/>
+	<result column="RULE_NAME" property="ruleName" jdbcType="VARCHAR"/>
+	<result column="RESPONSE_TYPE" property="responseType" jdbcType="VARCHAR"/>
+	<result column="TXT_CONTENT" property="txtContent" jdbcType="VARCHAR"/>
+	<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+   <resultMap id="BaseResultMapKey" type="java.util.Map" >
+	<id column="KEYWORD_ID" property="keywordId" jdbcType="VARCHAR"/>
+	<result column="RULE_ID" property="ruleId" jdbcType="VARCHAR"/>
+	<result column="KEYWORD" property="keyWord" jdbcType="VARCHAR"/>
+    <result column="IS_ALLMATCH" property="isAllmatch" jdbcType="INTEGER"/>
+  </resultMap>
+    
+    <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+	<if test="keyWord != null and keyWord !=''" >
+		 AND KEYWORD = #{keyWord}
+	 </if>
+	<if test="ruleName != null and ruleName != ''" >
+		 AND RULE_NAME = #{ruleName}
+	 </if>
+	 <if test="ruleId != null and ruleId != ''" >
+		 AND RULE_ID = #{ruleId}
+	 </if>
+    </trim>
+  </sql>
+   
+   <sql id="Base_Column_List" >
+  	k.KEYWORD_ID,k.RULE_ID,k.KEYWORD,k.IS_ALLMATCH,r.RULE_NAME,r.RESPONSE_TYPE,r.TXT_CONTENT,r.MATERIAL_ID
+  </sql> 
+  <sql id="Base_Column_ListRule" >
+  	RULE_ID,RULE_NAME,CREATE_USER,CREATE_TIME,RESPONSE_TYPE,TXT_CONTENT,MATERIAL_ID
+  </sql> 
+   <sql id="Base_Column_ListKey" >
+  	KEYWORD_ID,RULE_ID,KEYWORD,IS_ALLMATCH
+  </sql> 
+ 
+
+	<!-- 分页查询规则表 -->
+	<select id="getRuleList" resultMap="BaseResultMapRule">
+		<include refid="common.Oracle_Pagination_Head" />
+		select
+		<include refid="Base_Column_ListRule" />
+		from T_WX_KEYWORDS_RULE
+		<if test="queryKey != null">
+		where RULE_NAME like '%'||#{queryKey}||'%'
+		</if>
+		order by CREATE_TIME desc
+		<include refid="common.Oracle_Pagination_Tail" />
+	</select>
+
+	<!-- 根据ruleId查询关键字表 -->
+	<select id="getKeyInfo" resultMap="BaseResultMapKey">
+		<include refid="common.Oracle_Pagination_Head" />
+		select
+		<include refid="Base_Column_ListKey" />
+		from T_WX_KEYWORDS
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+		<include refid="common.Oracle_Pagination_Tail" />
+	</select>
+	<!-- 查询规则总数量 -->
+	<select id="countAll" resultType="java.lang.Integer">
+		select count(1)
+		from T_WX_KEYWORDS_RULE
+		<if test="queryKey != null">
+		where RULE_NAME like '%'||#{queryKey}||'%'
+		</if>
+	</select>
+    <!--   模糊查询所有与消息匹配的规则信息 -->
+  <select id="getByNews" parameterType="java.lang.String" resultMap="BaseResultMap">
+	 select
+	 <include refid="Base_Column_List"></include>
+	 from T_WX_KEYWORDS k 
+	 LEFT JOIN T_WX_KEYWORDS_RULE r
+	 ON k.RULE_ID=r.RULE_ID
+	 where INSTR(#{new,jdbcType=VARCHAR},K.KEYWORD)>0
+	 order by r.CREATE_TIME desc
+  </select>
+      <!--查询条件为关键字时，模糊查询-->
+  <select id="getByKey" parameterType="java.lang.String" resultMap="BaseResultMapRule">
+	SELECT 	<include refid="Base_Column_ListRule" />
+	FROM
+	T_WX_KEYWORDS_RULE 
+	WHERE
+	RULE_ID IN (
+		SELECT
+			RULE_ID
+		FROM
+			T_WX_KEYWORDS 
+		WHERE
+			KEYWORD LIKE '%'||#{queryKey}||'%'
+		GROUP BY
+			RULE_ID
+	)
+
+  </select>
+
+  <!-- 逻辑删除微信关注语 -->
+ <!--  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_SUBCRIBE_MSG
+    set DELETE_FLAG = -1
+    where SUB_ID = #{subId,jdbcType=VARCHAR}
+  </update> -->
+
+
+  <!-- 增加规则 -->
+   <insert id="insertRule" parameterType="java.util.Map" >
+	   insert into T_WX_KEYWORDS_RULE
+	   <trim prefix="(" suffix=")" suffixOverrides="," >
+	      RULE_ID,
+	   <if test="ruleName != null"> RULE_NAME, </if>
+	<if test="responseType != null"> RESPONSE_TYPE, </if>
+	<if test="txtContent != null"> TXT_CONTENT, </if>
+	<if test="materialId != null"> MATERIAL_ID, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+	   </trim>
+	   <trim prefix="values (" suffix=")" suffixOverrides="," >
+	     #{ruleId},
+	    <if test="ruleName != null"> #{ruleName}, </if>
+	<if test="responseType != null"> #{responseType}, </if>
+	<if test="txtContent != null"> #{txtContent}, </if>
+	<if test="materialId != null"> #{materialId}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+	   </trim>
+ </insert>
+  <!-- 增加关键字 -->
+  <insert id="insertKeywords" parameterType="java.util.Map" >
+    insert into T_WX_KEYWORDS
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       KEYWORD_ID,
+    <if test="ruleId != null"> RULE_ID, </if>
+	<if test="keyword != null"> KEYWORD, </if>
+	<if test="isAllmatch != null"> IS_ALLMATCH, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{keywordId},
+     <if test="ruleId != null"> #{ruleId}, </if>
+	<if test="keyword != null"> #{keyword}, </if>
+	<if test="isAllmatch != null"> #{isAllmatch}, </if>
+    </trim>
+  </insert>  
+    <!-- 更新规则  -->
+  <update id="updateRule" parameterType="java.util.Map" >
+    update T_WX_KEYWORDS_RULE
+     <set >
+     <if test="ruleName != null">RULE_NAME = #{ruleName}, </if>
+	<if test="responseType != null">RESPONSE_TYPE = #{responseType}, </if>
+	<if test="txtContent != null">TXT_CONTENT = #{txtContent}, </if>
+      <if test="materialId != null">MATERIAL_ID = #{materialId}, </if>
+    </set>
+    where RULE_ID = #{ruleId,jdbcType=VARCHAR}
+  </update>
+      <!-- 更新关键字  -->
+  <update id="updateKeywords" parameterType="java.util.Map" >
+    update T_WX_KEYWORDS
+     <set >
+	<if test="keyword != null">KEYWORD = #{keyword}, </if>
+	<if test="isAllmatch != null">IS_ALLMATCH = #{isAllmatch}, </if>
+    </set>
+    where KEYWORD_ID = #{keywordId,jdbcType=VARCHAR}
+  </update>
+    <!-- 删除整条规则 -->
+   <delete id="deleteRule" parameterType="java.lang.String" >
+    delete from T_WX_KEYWORDS_RULE
+    where RULE_ID = #{ruleId,jdbcType=VARCHAR}
+  </delete>
+      <!-- 删除整规则 时级联删除关键字-->
+   <delete id="deleteKeywords" parameterType="java.lang.String" >
+    delete from T_WX_KEYWORDS
+    where RULE_ID = #{ruleId,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>

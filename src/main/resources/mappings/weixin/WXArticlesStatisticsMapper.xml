@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXArticlesStatisticsMapper" >
+
+	<resultMap id="BaseResultMap" type="java.util.Map" >
+	  	<id column="ID" property="id" jdbcType="VARCHAR"/>
+	  	<result column="MSGID" property="msgid" jdbcType="VARCHAR"/>
+		<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+		<result column="INT_PAGE_READ_USER" property="intPageReadUser" jdbcType="INTEGER"/>
+		<result column="INT_PAGE_READ_COUNT" property="intPageReadCount" jdbcType="INTEGER"/>
+		<result column="ORI_PAGE_READ_USER" property="oriPageReadUser" jdbcType="INTEGER"/>
+		<result column="ORI_PAGE_READ_COUNT" property="oriPageReadCount" jdbcType="INTEGER"/>
+		<result column="SHARE_SCENE" property="shareScene" jdbcType="INTEGER"/>
+		<result column="SHARE_USER" property="shareUser" jdbcType="INTEGER"/>
+		<result column="SHARE_COUNT" property="shareCount" jdbcType="INTEGER"/>
+		<result column="ADD_TO_FAV_USER" property="addToFavUser" jdbcType="INTEGER"/>
+		<result column="ADD_TO_FAV_COUNT" property="addToFavCount" jdbcType="INTEGER"/>
+		<result column="STAT_DATE" property="statDate" jdbcType="DATE"/>
+  	</resultMap>
+
+  	<!-- 单篇图文列表 -->
+  	<select id="getList" resultMap="BaseResultMap" parameterType="java.util.Map">
+  		select t.TITLE,s.MSGID,s.INT_PAGE_READ_USER,s.INT_PAGE_READ_COUNT,
+				s.ORI_PAGE_READ_USER,s.ORI_PAGE_READ_COUNT,
+				s.SHARE_SCENE,s.SHARE_USER,s.SHARE_COUNT,
+				s.ADD_TO_FAV_USER,s.ADD_TO_FAV_COUNT,
+				s.STAT_DATE
+				from 
+				T_WX_ARTICLES_STATISTICS s
+				INNER JOIN T_WX_ARTICLES t on s.MSGID = t.ARTICLE_ID
+			where 
+			
+		    <if test="startTime != null and  startTime != ''">
+	        	<![CDATA[ s.STAT_DATE > to_date(#{startTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+	    	</if>
+	    	<if test="endTime != null and  endTime != ''">
+	        	<![CDATA[ AND s.STAT_DATE < to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+	    	</if>
+  	</select>
+
+	<!-- 昨日关键指标 -->
+	<select id="getTotalCountByYesterday" resultType="java.util.Map" parameterType="java.util.Map">
+		select 	sum(t.INT_PAGE_READ_COUNT),sum(t.INT_PAGE_READ_USER),
+				sum(t.ORI_PAGE_READ_COUNT),sum(t.ORI_PAGE_READ_USER),sum(t.ADD_TO_FAV_COUNT),sum(t.ADD_TO_FAV_USER),
+				sum(t.SHARE_COUNT),sum(t.SHARE_USER)
+				from T_WX_ARTICLES_HOUR_STA t
+				where t.STAT_DATE= to_date(#{statDate,jdbcType=DATE},'yyyy-MM-dd')
+	
+	</select>
+	
+	<!-- 按日统计的图文分析数据列表 -->
+	<select id="getListByDay" resultType="java.util.Map" parameterType="java.util.Map">
+		select 	sum(t.INT_PAGE_READ_COUNT) as "intPageReadCount",sum(t.INT_PAGE_READ_USER) as "intPageReadUser",
+				sum(t.ORI_PAGE_READ_COUNT) as "oriPageReadCount",sum(t.ORI_PAGE_READ_USER) as "oriPageReadUser",
+				sum(t.ADD_TO_FAV_COUNT) as "addToFavCount",sum(t.ADD_TO_FAV_USER) as "addToFavUser",
+				sum(t.SHARE_COUNT) as "shareCount",sum(t.SHARE_USER) as "shareUser",t.STAT_DATE as "statDate"
+				from T_WX_ARTICLES_HOUR_STA t
+				<include refid="subscribe_Where_Clause" />
+				GROUP BY t.STAT_DATE
+	</select>
+	
+	<sql id="subscribe_Where_Clause" >
+	  	<trim prefix="where" prefixOverrides="and|or" >
+	  		<if test="searchType == day"> 
+	  			<if test="startTime != null and  startTime != ''">
+	        		<![CDATA[ AND t.STAT_DATE >= to_date(#{startTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+	    		</if>
+	    		<if test="endTime != null and  endTime != ''">
+	        		<![CDATA[ AND t.STAT_DATE <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd')]]>
+	    		</if>
+	  			</if>
+	  		<if test="searchType == week"> 
+	        	<![CDATA[ AND t.STAT_DATE >= trunc(sysdate-7)]]>
+	        	<![CDATA[ AND t.STAT_DATE <= trunc(sysdate-1)]]>
+	  		</if>
+	  		<if test="searchType == half"> 
+				<![CDATA[ AND t.STAT_DATE >= trunc(sysdate-15)]]>
+	        	<![CDATA[ AND t.STAT_DATE <= trunc(sysdate-1)]]>
+	  		</if>
+	  		<if test="searchType == month"> 
+	        	<![CDATA[ AND t.STAT_DATE >= trunc(sysdate-30)]]>
+	        	<![CDATA[ AND t.STAT_DATE <= trunc(sysdate-1)]]>
+	  		</if>
+	  	</trim>
+	  </sql>
+	  
+	 <!-- 按小时统计的图文分析列表 -->
+	<select id="getListByHour" resultType="java.util.Map" parameterType="java.util.Map">
+		select 	sum(t.INT_PAGE_READ_COUNT) as "intPageReadCount",sum(t.INT_PAGE_READ_USER) as "intPageReadUser",
+				sum(t.ORI_PAGE_READ_COUNT)as "oriPageReadCount",sum(t.ORI_PAGE_READ_USER) as "oriPageReadUser",
+				sum(t.ADD_TO_FAV_COUNT) as "addToFavCount",sum(t.ADD_TO_FAV_USER) as "addToFavUser",
+				sum(t.SHARE_COUNT) as "shareCount",sum(t.SHARE_USER) as "shareUser",t.REF_HOUR as "refHour" 
+				from T_WX_ARTICLES_HOUR_STA t
+				where t.STAT_DATE= to_date(#{statDate,jdbcType=DATE},'yyyy-MM-dd') 
+				GROUP BY t.REF_HOUR
+	</select>
+	
+	
+	
+</mapper>

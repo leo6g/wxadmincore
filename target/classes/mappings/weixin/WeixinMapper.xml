@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WeixinMapper">
+	<resultMap id="WeixinAutoReplyRespMsgMap" type="java.util.Map">
+		<result column="KEY_WORD" property="keyWord" jdbcType="VARCHAR" />
+		<result column="MSG_TYPE" property="msgType" jdbcType="VARCHAR" />
+		<result column="CONTENT" property="content" jdbcType="VARCHAR" />
+		<result column="TITLE" property="title" jdbcType="VARCHAR" />
+		<result column="RESPONSE_TYPE" property="responseType"
+			jdbcType="VARCHAR" />
+		<result column="TXT_CONTENT" property="txtContent" jdbcType="VARCHAR" />
+		<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR" />
+		<result column="DIGEST" property="digest" jdbcType="VARCHAR" />
+		<result column="REMOTE_URL" property="remoteUrl" jdbcType="VARCHAR" />
+		<result column="CONTENT_SOURCE_URL" property="contentSourceUrl"
+			jdbcType="VARCHAR" />
+		<result column="IS_ALLRESP" property="isAllresp" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="getWeixinAutoReplyRespMsgList" resultMap="WeixinAutoReplyRespMsgMap">
+		select
+		a.key_word, a.msg_type, b.content
+		from t_wx_auto_response a,
+		t_wx_text_templates b
+		where a.text_temp_id = b.text_temp_id
+	</select>
+
+	<select id="getMaterial" resultMap="WeixinAutoReplyRespMsgMap">
+		SELECT
+		AR.TITLE,
+		AR.MATERIAL_ID,
+		AR.DIGEST,
+		ma.REMOTE_URL,
+		AR.REMOTE_URL as "url"
+		FROM
+		T_WX_ARTICLES ar
+		LEFT JOIN T_WX_KEYWORDS_RULE ro ON AR.MATERIAL_ID = RO.MATERIAL_ID
+		LEFT JOIN T_WX_KEYWORDS keyw ON RO.RULE_ID = keyw.RULE_ID
+		LEFT JOIN T_WX_MATERIAL ma ON MA.media_id = ar.thumb_media_id
+		WHERE
+		keyw.KEYWORD =#{keyWord}
+		AND RO.RESPONSE_TYPE = 'article'
+		AND ma.category = 'image'
+		ORDER BY
+		AR.INDEX_NUM
+	</select>
+
+	<select id="getReType" resultMap="WeixinAutoReplyRespMsgMap">
+		SELECT
+		Ru.RESPONSE_TYPE,Ru.TXT_CONTENT,RU.MATERIAL_ID
+		FROM
+
+		T_WX_KEYWORDS_RULE
+		ru
+		LEFT JOIN T_WX_KEYWORDS ke ON Ru.RULE_ID = KE.RULE_ID
+		WHERE
+		ke.KEYWORD = #{keyWord}
+	</select>
+
+</mapper>

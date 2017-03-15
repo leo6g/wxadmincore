@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXSubcribeMsgMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="SUB_ID" property="subId" jdbcType="VARCHAR"/>
+  	<result column="TEMPLATE_ID" property="templateId" jdbcType="VARCHAR"/>
+	<result column="MSG_TYPE" property="msgType" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	<result column="CREATE_USER" property="createUser" jdbcType="VARCHAR"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="templateId != null" >
+		 AND TEMPLATE_ID = #{templateId}
+	 </if>
+	<if test="msgType != null and msgType != ''" >
+		 AND MSG_TYPE like '%'||#{msgType}||'%'
+	 </if>
+	<if test="subId != null" >
+		 AND SUB_ID = #{subId}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	<if test="createUser != null" >
+		 AND CREATE_USER = #{createUser}
+	 </if>
+	 <if test="beginTime != null and  beginTime != ''">
+          <![CDATA[ AND CREATE_TIME >= to_date(#{beginTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+     </if>
+      <if test="endTime != null and  endTime != ''">
+            <![CDATA[ AND CREATE_TIME <= to_date(#{endTime,jdbcType=DATE},'yyyy-MM-dd hh24:mi:ss')]]>
+      </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	TEMPLATE_ID,MSG_TYPE,SUB_ID,CREATE_TIME,CREATE_USER,
+  	DECODE(msg_type,
+        'news',(select Npl.name from  t_wx_news_templates npl where npl.news_temp_id = template_id ),
+        'text',(select tpl.name from  t_wx_TEXT_templates tpl where tpl.text_temp_id = template_id )) AS "templateName",
+    DECODE(msg_type,
+        'text',(select tpl.content from  t_wx_TEXT_templates tpl where tpl.text_temp_id = template_id )) AS "textContent"
+  	
+  </sql>
+  
+  <!-- 分页查询微信关注语 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_SUBCRIBE_MSG
+	    <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   		</if>
+       <if test="orderByClause != null" >
+	     order by ${orderByClause}
+	   </if>
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信关注语 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_SUBCRIBE_MSG
+    where SUB_ID = #{subId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信关注语总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_SUBCRIBE_MSG
+	     <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   		</if>
+       <if test="orderByClause != null" >
+	     	order by ${orderByClause}
+	    </if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信关注语 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_SUBCRIBE_MSG 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信关注语编码,查询微信关注语信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_SUBCRIBE_MSG
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="subId != null" >
+    	and SUB_ID != #{subId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信关注语 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_SUBCRIBE_MSG
+    
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       SUB_ID,
+      <if test="templateId != null"> TEMPLATE_ID, </if>
+	<if test="msgType != null"> MSG_TYPE, </if>
+	<if test="createTime != null and createTime !=''"> CREATE_TIME, </if>
+	<if test="createUser != null"> CREATE_USER, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{subId},
+     <if test="templateId != null"> #{templateId}, </if>
+	<if test="msgType != null"> #{msgType}, </if>
+	<if test="createTime != null and createTime !=''"> #{createTime}, </if>
+	<if test="createUser != null"> #{createUser}, </if>
+    </trim>
+  </insert>
+  
+  <!-- 更新微信关注语 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_SUBCRIBE_MSG
+     <set >
+      <if test="templateId != null">TEMPLATE_ID = #{templateId}, </if>
+	<if test="msgType != null">MSG_TYPE = #{msgType}, </if>
+	<if test="createTime != null and createTime !=''">CREATE_TIME = #{createTime}, </if>
+	<if test="createUser != null">CREATE_USER = #{createUser}, </if>
+    </set>
+    where SUB_ID = #{subId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_SUBCRIBE_MSG
+    where SUB_ID = #{subId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信关注语 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_SUBCRIBE_MSG
+    set DELETE_FLAG = -1
+    where SUB_ID = #{subId,jdbcType=VARCHAR}
+  </update>
+</mapper>

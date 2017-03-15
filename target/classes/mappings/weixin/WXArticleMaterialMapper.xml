@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="WXArticleMaterialMapper" >
+  
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="ARTICLE_ID" property="articleId" jdbcType="VARCHAR"/>
+  	<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	<result column="AUTHOR" property="author" jdbcType="VARCHAR"/>
+	<result column="THUMB_MEDIA_ID" property="thumbMediaId" jdbcType="VARCHAR"/>
+	<result column="DIGEST" property="digest" jdbcType="VARCHAR"/>
+	<result column="CONTENT" property="content" jdbcType="CLOB"
+			javaType="java.lang.String" typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+	<result column="CONTENT_SOURCE_URL" property="sourceUrl" jdbcType="VARCHAR"/>
+	<result column="SHOW_COVER_PIC" property="showCoverPic" jdbcType="VARCHAR"/>
+	<result column="INDEX_NUM" property="indexNum" jdbcType="INTEGER"/>
+  </resultMap>
+  
+  
+  <resultMap id="BaseResultMap2" type="java.util.Map" >
+  	<id column="ARTICLE_ID" property="articleId" jdbcType="VARCHAR"/>
+  	<result column="MATERIAL_ID" property="materialId" jdbcType="VARCHAR"/>
+	<result column="TITLE" property="title" jdbcType="VARCHAR"/>
+	<result column="AUTHOR" property="author" jdbcType="VARCHAR"/>
+	<result column="THUMB_MEDIA_ID" property="thumbMediaId" jdbcType="VARCHAR"/>
+	<result column="DIGEST" property="digest" jdbcType="VARCHAR"/>
+	<result column="CONTENT" property="content" jdbcType="CLOB"
+			javaType="java.lang.String" typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+	<result column="CONTENT_SOURCE_URL" property="sourceUrl" jdbcType="VARCHAR"/>
+	<result column="SHOW_COVER_PIC" property="showCoverPic" jdbcType="VARCHAR"/>
+	<result column="INDEX_NUM" property="indexNum" jdbcType="INTEGER"/>
+	<result column="LOCAL_URL" property="localUrl" jdbcType="VARCHAR"/>
+	<result column="MEDIA_ID" property="atl" jdbcType="VARCHAR"/>
+  </resultMap>
+  
+  
+  
+  <sql id="Base_Column_List" >
+  		ARTICLE_ID,MATERIAL_ID,TITLE,AUTHOR,THUMB_MEDIA_ID,DIGEST,CONTENT,CONTENT_SOURCE_URL,SHOW_COVER_PIC
+  </sql>
+  	
+  
+  <!-- 根据素材ID，查询微信文章列表 -->
+  <select id="getByMaterialId" resultMap="BaseResultMap2" parameterType="java.lang.String" >
+    select 
+    	atl.ARTICLE_ID,
+    	atl.MATERIAL_ID,
+    	atl.TITLE,
+    	atl.AUTHOR,
+    	atl.THUMB_MEDIA_ID,
+    	atl.DIGEST,
+    	atl.CONTENT,
+    	atl.CONTENT_SOURCE_URL,
+    	atl.SHOW_COVER_PIC,
+    	atl.INDEX_NUM,
+    	atl.REMOTE_URL as "url",
+    	atl.TYPE as "type",
+    	atl.BELONG_CITY as "belongCity",
+    	atl.ACT_START_DATE as "actStartDate",
+    	atl.ACT_END_DATE as "actEndDate",
+    	mtl.LOCAL_URL,
+    	mtl.REMOTE_URL as "imgUrl",
+    	mtl.MEDIA_ID
+    from T_WX_ARTICLES atl
+    left join T_WX_MATERIAL mtl on atl.THUMB_MEDIA_ID = mtl.MEDIA_ID
+    where atl.MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+    order by atl.INDEX_NUM asc
+  </select>
+  
+  
+  <!-- 根据微信图文素材MediaId，查询微信文章列表，暂不查询内容项目CONTENT -->
+  <select id="getArticlesByWxMediaId" resultMap="BaseResultMap2" parameterType="java.lang.String" >
+    select distinct
+    	atl.ARTICLE_ID,
+    	atl.MATERIAL_ID,
+    	atl.TITLE,
+    	atl.AUTHOR,
+    	atl.THUMB_MEDIA_ID,
+    	atl.DIGEST,
+    	atl.CONTENT_SOURCE_URL,
+    	atl.SHOW_COVER_PIC,
+    	atl.INDEX_NUM,
+    	atl.REMOTE_URL as "url",
+    	atl.TYPE as "type",
+    	atl.BELONG_CITY as "belongCity",
+    	atl.ACT_START_DATE as "actStartDate",
+    	atl.ACT_END_DATE as "actEndDate",
+    	mtl2.REMOTE_URL as "imgUrl",
+    	mtl2.LOCAL_URL,
+    	mtl.MEDIA_ID
+    from T_WX_ARTICLES atl
+    inner join T_WX_MATERIAL mtl on atl.MATERIAL_ID = mtl.MATERIAL_ID
+    left join T_WX_MATERIAL mtl2 on atl.THUMB_MEDIA_ID = mtl2.MEDIA_ID
+    where mtl.MEDIA_ID = #{mediaId,jdbcType=VARCHAR}
+    order by atl.INDEX_NUM asc
+  </select>
+  
+  
+  <!-- 根据素材ID，删除微信文章信息 -->
+  <delete id="deleteByMaterialId" parameterType="java.lang.String" >
+    delete from T_WX_ARTICLES
+    where MATERIAL_ID = #{materialId,jdbcType=VARCHAR}
+  </delete>
+  	
+  
+  
+  <!-- 新增微信文章信息 -->
+  <insert id="insert" parameterType="java.util.Map" >
+  		insert into T_WX_ARTICLES
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+		    <if test="articleId != null">ARTICLE_ID ,</if>
+		    <if test="materialId != null">MATERIAL_ID ,</if>
+		    <if test="title != null">TITLE , </if>
+		    <if test="author != null">AUTHOR , </if>
+		    <if test="thumbMediaId != null">THUMB_MEDIA_ID , </if>
+		    <if test="digest != null">DIGEST , </if>
+		    <if test="content != null">CONTENT , </if>
+		    <if test="sourceUrl != null">CONTENT_SOURCE_URL , </if>
+		    <if test="showCoverPic != null">SHOW_COVER_PIC , </if>
+		    <if test="indexNum != null">INDEX_NUM , </if>
+		    <if test="remoteUrl != null">REMOTE_URL , </if>
+		    <if test="type != null">TYPE , </if>
+		    <if test="belongCity != null">BELONG_CITY , </if>
+		    <if test="actStartDate != null">ACT_START_DATE , </if>
+		    <if test="actEndDate != null">ACT_END_DATE , </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+		    <if test="articleId != null"> #{articleId}, </if>
+		    <if test="materialId != null"> #{materialId}, </if>
+		    <if test="title != null"> #{title}, </if>
+		    <if test="author != null"> #{author}, </if>
+		    <if test="thumbMediaId != null"> #{thumbMediaId}, </if>
+		    <if test="digest != null"> #{digest}, </if>
+		    <if test="content != null"> #{content,jdbcType = CLOB}, </if>
+		    <if test="sourceUrl != null"> #{sourceUrl}, </if>
+		    <if test="showCoverPic != null"> #{showCoverPic}, </if>
+		    <if test="indexNum != null"> #{indexNum}, </if>
+		    <if test="remoteUrl != null"> #{remoteUrl}, </if>
+		    <if test="type != null"> #{type}, </if>
+		    <if test="belongCity != null"> #{belongCity}, </if>
+		    <if test="actStartDate != null"> to_date(#{actStartDate},'yyyy-mm-dd hh24:mi:ss'), </if>
+		    <if test="actEndDate != null"> to_date(#{actEndDate},'yyyy-mm-dd hh24:mi:ss'), </if>
+	    </trim>
+  </insert>
+  
+  
+  
+  <!-- 更新微信素材表 -->
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_ARTICLES
+    <set >
+	    <if test="materialId != null">MATERIAL_ID = #{materialId}, </if>
+	    <if test="title != null">TITLE = #{title}, </if>
+	    <if test="author != null">AUTHOR = #{author}, </if>
+	    <if test="thumbMediaId != null">THUMB_MEDIA_ID = #{thumbMediaId}, </if>
+	    <if test="digest != null">DIGEST = #{digest}, </if>
+	    <if test="content != null">CONTENT = #{content}, </if>
+	    <if test="sourceUrl != null">CONTENT_SOURCE_URL = #{sourceUrl}, </if>
+	    <if test="showCoverPic != null">SHOW_COVER_PIC = #{showCoverPic}, </if>
+	    <if test="indexNum != null">INDEX_NUM = #{indexNum}, </if>
+	    <if test="type != null">TYPE = #{type}, </if>
+	    <if test="belongCity != null">BELONG_CITY = #{belongCity}, </if>
+	    <if test="actStartDate != null">ACT_START_DATE = to_date(#{actStartDate},'yyyy-mm-dd hh24:mi:ss'), </if>
+		<if test="actEndDate != null">ACT_END_DATE = to_date(#{actEndDate},'yyyy-mm-dd hh24:mi:ss'), </if>
+    </set>
+    where ARTICLE_ID = #{articleId}
+  </update>
+  
+  
+</mapper>

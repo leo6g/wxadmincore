@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UserMessageMapper" >
+  <resultMap id="BaseResultMap" type="java.util.Map" >
+  	<id column="MSG_ID" property="msgId" jdbcType="VARCHAR"/>
+  	<result column="MSG" property="msg" jdbcType="VARCHAR"/>
+	<result column="WX_USER_ID" property="wxUserId" jdbcType="VARCHAR"/>
+	<result column="CREATE_TIME" property="createTime" jdbcType="DATE"/>
+	
+  </resultMap>
+  
+  <sql id="Example_Where_Clause" >
+    <trim prefix="where" prefixOverrides="and|or" >
+      <if test="msg != null" >
+		 AND MSG LIKE '%'||#{msg,jdbcType=VARCHAR}||'%'
+	 </if>
+	<if test="wxUserId != null" >
+		 AND WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}
+	 </if>
+	<if test="msgId != null" >
+		 AND MSG_ID = #{msgId,jdbcType=VARCHAR}
+	 </if>
+	<if test="createTime != null and createTime !=''" >
+		 AND CREATE_TIME = to_date('${createTime}','yyyy-mm-dd hh24:mi:ss')
+	 </if>
+	     
+    </trim>
+  </sql>
+  
+  <sql id="Base_Column_List" >
+  	m.MSG,m.WX_USER_ID,m.MSG_ID,m.CREATE_TIME,
+  	u.header_image as "headerImage",
+    u.nick_name as "nickName"
+  </sql>
+  
+  <!-- 分页查询微信会员用户留言表 -->
+  
+  <select id="getList" resultMap="BaseResultMap" >
+  	<include refid="common.Oracle_Pagination_Head" />
+	    select 
+	    <include refid="Base_Column_List" />
+	    from T_WX_USER_MESSAGE m 
+	    left join t_wx_user u
+	    on  m.wx_user_id = u.open_id
+	<if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+    order by CREATE_TIME desc
+    <include refid="common.Oracle_Pagination_Tail" />
+  </select>
+  
+  <!-- 根据Id查询微信会员用户留言表 -->
+  
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_USER_MESSAGE
+    where MSG_ID = #{msgId,jdbcType=VARCHAR}
+  </select>
+  
+  <!-- 查询微信会员用户留言表总数量 -->
+  
+  <select id="countAll" resultType="java.lang.Integer" >
+	    select count(1)
+	    from T_WX_USER_MESSAGE
+	    <if test="_parameter != null" >
+     	<include refid="Example_Where_Clause" />
+   	</if>
+	    <!-- 有DELETE_FLAG放开-->
+	   <!-- where DELETE_FLAG = 0 -->
+  </select>
+  
+  <!-- 查询所有微信会员用户留言表 -->
+  
+  <select id="getAll" resultMap="BaseResultMap">
+    select 
+     <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from T_WX_USER_MESSAGE 
+   <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!-- 根据微信会员用户留言表编码,查询微信会员用户留言表信息 有code验证时放开-->
+   <!-- <select id="getByCode" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from T_WX_USER_MESSAGE
+    where  = #{,jdbcType=}
+    AND DELETE_FLAG = 0 
+    <if test="msgId != null" >
+    	and MSG_ID != #{msgId,jdbcType=VARCHAR}
+    </if>
+  </select> -->
+  
+  <!-- 增加微信会员用户留言表 -->
+  
+  <insert id="insert" parameterType="java.util.Map" >
+    insert into T_WX_USER_MESSAGE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+       MSG_ID,
+      <if test="msg != null"> MSG, </if>
+	<if test="wxUserId != null"> WX_USER_ID, </if>
+	<if test="createTime != null"> CREATE_TIME, </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      #{msgId},
+     <if test="msg != null"> #{msg,jdbcType=VARCHAR}, </if>
+	<if test="wxUserId != null"> #{wxUserId,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null"> to_date('${createTime}','yyyy-mm-dd hh24:mi:ss'), </if>
+	
+    </trim>
+  </insert>
+  
+  <!-- 更新微信会员用户留言表 -->
+    
+  <update id="update" parameterType="java.util.Map" >
+    update T_WX_USER_MESSAGE
+     <set >
+      <if test="msg != null">MSG = #{msg,jdbcType=VARCHAR}, </if>
+	<if test="wxUserId != null">WX_USER_ID = #{wxUserId,jdbcType=VARCHAR}, </if>
+	<if test="createTime != null ">CREATE_TIME = #{createTime,jdbcType=DATE}, </if>
+    </set>
+    where MSG_ID = #{msgId,jdbcType=VARCHAR}
+  </update>
+  <delete id="delete" parameterType="java.lang.String" >
+    delete from T_WX_USER_MESSAGE
+    where MSG_ID = #{msgId,jdbcType=VARCHAR}
+  </delete>
+  <!-- 逻辑删除微信会员用户留言表 -->
+  
+  <update id="logicDelete" parameterType="java.util.Map" >
+    update T_WX_USER_MESSAGE
+    set DELETE_FLAG = -1
+    where MSG_ID = #{msgId,jdbcType=VARCHAR}
+  </update>
+</mapper>
